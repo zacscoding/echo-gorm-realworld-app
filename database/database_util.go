@@ -1,6 +1,7 @@
 package database
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -21,8 +22,28 @@ import (
 
 type CloseFunc func() error
 
+// RunInTx begin transaction from given database and execute f.
+func RunInTx(ctx context.Context, db *gorm.DB, opts *sql.TxOptions, f func(txDb *gorm.DB) error) error {
+	tx := db.WithContext(ctx).Begin(opts)
+	if tx.Error != nil {
+		return fmt.Errorf("start tx: %v", tx.Error)
+	}
+
+	if err := f(tx); err != nil {
+		if err1 := tx.Rollback().Error; err1 != nil {
+			return fmt.Errorf("rollback tx: %v (original error: %v)", err1, err)
+		}
+		return err
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return fmt.Errorf("commit tx: %v", err)
+	}
+	return nil
+}
+
 // NewTestDatabase start a mysql docker container and returns gorm.DB
-func NewTestDatabase(tb testing.TB, migration bool) *gorm.DB {
+func NewTestDatabase(tb testing.TB, migration bool) (*gorm.DB, CloseFunc) {
 	tb.Helper()
 	var db *sql.DB
 
@@ -52,13 +73,6 @@ func NewTestDatabase(tb testing.TB, migration bool) *gorm.DB {
 		log.Fatalf("Failed to connect to docker: %v", err)
 	}
 
-	tb.Cleanup(func() {
-		_ = db.Close()
-		if err := pool.Purge(resource); err != nil {
-			log.Fatalf("Failed to purge resource: %s", err)
-		}
-	})
-
 	gdb, err := gorm.Open(gMysql.New(gMysql.Config{
 		Conn: db,
 	}), &gorm.Config{
@@ -72,18 +86,27 @@ func NewTestDatabase(tb testing.TB, migration bool) *gorm.DB {
 		//),
 		Logger: NewLogger(time.Second, true, zapcore.FatalLevel),
 	})
-
 	if err != nil {
 		log.Fatalf("Failed to create a new gorm.DB: %s", err)
 	}
+
+	closeFn := func() error {
+		_ = db.Close()
+		if err := pool.Purge(resource); err != nil {
+			log.Fatalf("Failed to purge resource: %s", err)
+			return err
+		}
+		return nil
+	}
+
 	if !migration {
-		return gdb
+		return gdb, closeFn
 	}
 	err = migrateDB(dcn, "")
 	if err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
-	return gdb
+	return gdb, closeFn
 }
 
 func DeleteRecordAll(_ testing.TB, db *gorm.DB, tableWhereClauses []string) error {

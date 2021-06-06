@@ -7,9 +7,12 @@ import (
 )
 
 var (
-	ErrRecordNotFound = errors.New("not found record")
-	ErrKeyConflict    = errors.New("conflict key")
-	ErrFKConstraint   = errors.New("a foreign key constraint fails")
+	// ErrRecordNotFound an error if not exists record.
+	ErrRecordNotFound = errors.New("record not found")
+	// ErrKeyConflict an error if duplicate field.
+	ErrKeyConflict = errors.New("conflict key")
+	// ErrFKConstraint an error if foreign key constraint failed.
+	ErrFKConstraint = errors.New("a foreign key constraint fails")
 )
 
 // WrapError wrap database error to handle cause.

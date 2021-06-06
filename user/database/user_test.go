@@ -23,8 +23,9 @@ var (
 
 type Suite struct {
 	suite.Suite
-	db       UserDB
-	originDB *gorm.DB
+	db         UserDB
+	originDB   *gorm.DB
+	dbTeardown database.CloseFunc
 }
 
 func TestSuite(t *testing.T) {
@@ -37,14 +38,18 @@ func (s *Suite) SetupSuite() {
 		Level:       zapcore.FatalLevel,
 		Development: false,
 	})
-	s.originDB = database.NewTestDatabase(s.T(), true)
+	s.originDB, s.dbTeardown = database.NewTestDatabase(s.T(), true)
 	s.db = NewUserDB(s.originDB)
+}
+
+func (s *Suite) TearDownSuite() {
+	s.dbTeardown()
 }
 
 func (s *Suite) SetupTest() {
 	err := database.DeleteRecordAll(s.T(), s.originDB, []string{
-		model.FollowTableName, "user_id > 0 AND follow_id > 0",
-		model.UserTableName, "user_id > 0",
+		model.TableNameFollow, "user_id > 0 AND follow_id > 0",
+		model.TableNameUser, "user_id > 0",
 	})
 	s.NoError(err)
 
