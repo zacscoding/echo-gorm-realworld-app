@@ -278,6 +278,7 @@ func articleIdsByQuery(db *gorm.DB, query model.ArticleQuery, offset, limit int)
 func articleIdsByAuthors(db *gorm.DB, authors []uint, offset, limit int) ([]uint, error) {
 	var ids []uint
 	if err := db.Model(new(model.Article)).
+		Select("article_id").
 		Where("author_id IN (?) AND deleted_at IS NULL", authors).
 		Order("created_at DESC").
 		Offset(offset).
@@ -329,6 +330,7 @@ func articlesByIds(db *gorm.DB, ids []uint) ([]*model.Article, error) {
 	if err := db.Model(new(model.Article)).
 		Joins("Author").
 		Where("articles.article_id IN (?)", ids).
+		Order("articles.created_at DESC").
 		Find(&articles).Error; err != nil {
 		return nil, err
 	}
@@ -361,7 +363,11 @@ func articlesByIds(db *gorm.DB, ids []uint) ([]*model.Article, error) {
 		}
 		for _, tag := range at {
 			a := m[tag.ArticleId]
-			a.Tags = append(a.Tags, &tag.Tag)
+			a.Tags = append(a.Tags, &model.Tag{
+				ID:        tag.ID,
+				Name:      tag.Name,
+				CreatedAt: tag.CreatedAt,
+			})
 		}
 	}
 	return articles, nil

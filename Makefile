@@ -1,4 +1,10 @@
-.PHONY: docs generate
+.PHONY: docs generate test cleantests
+
+cleantests:
+	go clean -testcache
+
+test:
+	go test ./...
 
 generate:
 	go generate ./...

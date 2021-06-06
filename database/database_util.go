@@ -60,8 +60,7 @@ func NewTestDatabase(tb testing.TB, migration bool) (*gorm.DB, CloseFunc) {
 	}
 	err = resource.Expire(60 * 5)
 
-	// exponential backoff-retry, because the application in the container might not be ready to accept connections yet
-	dcn := fmt.Sprintf("root:secret@(localhost:%s)/mysql?charset=utf8&parseTime=True&multiStatements=true", resource.GetPort("3306/tcp"))
+	dcn := fmt.Sprintf("root:secret@(localhost:%s)/mysql?charset=utf8&parseTime=true&multiStatements=true", resource.GetPort("3306/tcp"))
 	if err := pool.Retry(func() error {
 		var err error
 		db, err = sql.Open("mysql", dcn)
@@ -76,14 +75,6 @@ func NewTestDatabase(tb testing.TB, migration bool) (*gorm.DB, CloseFunc) {
 	gdb, err := gorm.Open(gMysql.New(gMysql.Config{
 		Conn: db,
 	}), &gorm.Config{
-		//Logger: logger.New(
-		//	log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
-		//	logger.Config{
-		//		SlowThreshold: time.Second,   // Slow SQL threshold
-		//		LogLevel:      logger.Silent, // Log level
-		//		Colorful:      false,         // Disable color
-		//	},
-		//),
 		Logger: NewLogger(time.Second, true, zapcore.FatalLevel),
 	})
 	if err != nil {

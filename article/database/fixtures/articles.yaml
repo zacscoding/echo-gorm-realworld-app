@@ -1,0 +1,72 @@
+- article_id: 1
+  slug: user1article1
+  title: user1article1
+  description: user1article1_description
+  body: user1article1_body
+  author_id: 1
+  created_at: 2020-01-01 14:00:00
+  updated_at: 2020-01-01 14:00:00
+- article_id: 2
+  slug: user1article2
+  title: user1article2
+  description: user1article2_description
+  body: user1article2_body
+  author_id: 1
+  created_at: 2020-01-02 14:00:00
+  updated_at: 2020-01-02 14:00:00
+- article_id: 3
+  slug: user1article3
+  title: user1article3
+  description: user1article3_description
+  body: user1article3_body
+  author_id: 1
+  created_at: 2020-01-03 14:00:00
+  updated_at: 2020-01-03 14:00:00
+- article_id: 4
+  slug: user1article4
+  title: user1article4
+  description: user1article4_description
+  body: user1article4_body
+  author_id: 1
+  created_at: 2020-01-04 14:00:00
+  updated_at: 2020-01-04 14:00:00
+- article_id: 5
+  slug: user1article5
+  title: user1article5
+  description: user1article5_description
+  body: user1article5_body
+  author_id: 1
+  created_at: 2020-01-05 14:00:00
+  updated_at: 2020-01-05 14:00:00
+- article_id: 6
+  slug: user1article6
+  title: user1article6
+  description: user1article6_description
+  body: user1article5_body
+  author_id: 1
+  created_at: 2020-01-06 14:00:00
+  updated_at: 2020-01-06 14:00:00
+- article_id: 7
+  slug: user2article1
+  title: user2article1
+  description: user2article1_description
+  body: user2article1_body
+  author_id: 2
+  created_at: 2020-01-07 14:00:00
+  updated_at: 2020-01-07 14:00:00
+- article_id: 8
+  slug: user2article2
+  title: user2article2
+  description: user2article2_description
+  body: user2article2_body
+  author_id: 2
+  created_at: 2020-01-08 14:00:00
+  updated_at: 2020-01-08 14:00:00
+- article_id: 9
+  slug: user3article1
+  title: user3article1
+  description: user3article1_description
+  body: user3article1_body
+  author_id: 3
+  created_at: 2020-01-09 14:00:00
+  updated_at: 2020-01-09 14:00:00

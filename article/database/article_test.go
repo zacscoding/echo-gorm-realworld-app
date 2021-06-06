@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"github.com/zacscoding/echo-gorm-realworld-app/article/model"
 	"github.com/zacscoding/echo-gorm-realworld-app/database"
@@ -10,6 +11,7 @@ import (
 	"go.uber.org/zap/zapcore"
 	"gorm.io/gorm"
 	"testing"
+	"time"
 )
 
 type Suite struct {
@@ -56,17 +58,10 @@ func (s *Suite) SetupTest() {
 }
 
 func (s *Suite) TestSave() {
-	s.NoError(s.originDB.Create([]*model.Tag{{Name: "exist1"}}).Error)
-	a := &model.Article{
-		Slug:        "article1",
-		Title:       "article1",
-		Description: "description",
-		Body:        "body",
-		Author:      *s.u1,
-		Tags: []*model.Tag{
-			{Name: "exist1"}, {Name: "newTag1"},
-		},
-	}
+	existTag := model.Tag{Name: "exist1"}
+	s.NoError(s.originDB.Create(&existTag).Error)
+	a := newArticle("article1", "description", "body", *s.u1, []string{existTag.Name, "newTag1"})
+	now := time.Now()
 
 	// when
 	err := s.db.Save(context.TODO(), a)
@@ -79,7 +74,173 @@ func (s *Suite) TestSave() {
 	s.Equal(a.Description, find.Description)
 	s.Equal(a.Body, find.Body)
 	s.Equal(a.Author.ID, find.AuthorID)
+	s.WithinDuration(now, find.CreatedAt, time.Minute)
+	s.WithinDuration(now, find.CreatedAt, time.Minute)
+	s.False(find.DeletedAt.Valid)
 	var tagCount int64
 	s.NoError(s.originDB.Model(new(model.Tag)).Count(&tagCount).Error)
 	s.EqualValues(2, tagCount)
+}
+
+func (s *Suite) TestSaveFail() {
+	exist := newArticle("article1", "", "", *s.u1, nil)
+	s.NoError(s.db.Save(context.TODO(), exist))
+
+	cases := []struct {
+		name    string
+		article *model.Article
+		msg     string
+	}{
+		{
+			name:    "duplicate",
+			article: newArticle(exist.Title, exist.Description, exist.Body, exist.Author, nil),
+			msg:     database.ErrKeyConflict.Error(),
+		},
+	}
+
+	for _, tc := range cases {
+		s.T().Run(tc.name, func(t *testing.T) {
+			err := s.db.Save(context.TODO(), tc.article)
+			s.Error(err)
+			s.Contains(err.Error(), tc.msg)
+		})
+	}
+}
+
+func (s *Suite) TestUpdate() {
+	exist := newArticle("article1", "description", "body", *s.u1, []string{"tag1", "tag2"})
+	s.NoError(s.db.Save(context.TODO(), exist))
+
+	update := &model.Article{
+		ID:          exist.ID,
+		Slug:        "newslug",
+		Title:       "newslug",
+		Description: "updated description",
+		Body:        "updated body",
+		Author:      exist.Author,
+		Tags:        exist.Tags,
+	}
+
+	// when
+	err := s.db.Update(context.TODO(), &exist.Author, update)
+	// then
+	s.NoError(err)
+	var find model.Article
+	s.NoError(s.originDB.First(&find, "article_id = ?", update.ID).Error)
+	s.Equal(update.Slug, find.Slug)
+	s.Equal(update.Title, find.Title)
+	s.Equal(update.Description, find.Description)
+	s.Equal(update.Body, find.Body)
+}
+
+func (s *Suite) TestUpdateFail() {
+	articles := []*model.Article{
+		newArticle("article1", "description", "body", *s.u1, nil),
+		newArticle("article2", "description", "body", *s.u1, nil),
+	}
+	s.NoError(s.originDB.Create(&articles).Error)
+
+	cases := []struct {
+		name   string
+		user   *userModel.User
+		update *model.Article
+		msg    string
+	}{
+		{
+			name: "duplicate slug",
+			user: s.u1,
+			update: &model.Article{
+				ID:   articles[0].ID,
+				Slug: articles[1].Slug,
+			},
+			msg: database.ErrKeyConflict.Error(),
+		}, {
+			name: "not found by author",
+			user: s.u2,
+			update: &model.Article{
+				ID:   articles[0].ID,
+				Slug: articles[0].Slug,
+			},
+			msg: database.ErrRecordNotFound.Error(),
+		}, {
+			name: "not found by article id",
+			user: s.u1,
+			update: &model.Article{
+				ID:   articles[1].ID + 10,
+				Slug: articles[0].Slug,
+			},
+			msg: database.ErrRecordNotFound.Error(),
+		},
+	}
+
+	for _, tc := range cases {
+		s.T().Run(tc.name, func(t *testing.T) {
+			err := s.db.Update(context.TODO(), tc.user, tc.update)
+			// then
+			assert.Error(t, err)
+			assert.Contains(t, err.Error(), tc.msg)
+		})
+	}
+}
+
+func (s *Suite) TestDeleteBySlug() {
+	exist := newArticle("article1", "description", "body", *s.u1, []string{"tag1", "tag2"})
+	s.NoError(s.db.Save(context.TODO(), exist))
+	now := time.Now()
+	// when
+	err := s.db.DeleteBySlug(context.TODO(), &exist.Author, exist.Slug)
+	// then
+	s.NoError(err)
+	var find model.Article
+	s.NoError(s.originDB.Unscoped().First(&find, "article_id = ?", exist.ID).Error)
+	s.WithinDuration(now, find.DeletedAt.Time, time.Minute)
+}
+
+func (s *Suite) TestDeleteBySlugFail() {
+	exist := newArticle("article1", "description", "body", *s.u1, []string{"tag1", "tag2"})
+	s.NoError(s.db.Save(context.TODO(), exist))
+
+	cases := []struct {
+		name string
+		user *userModel.User
+		slug string
+		msg  string
+	}{
+		{
+			name: "not found by slug",
+			user: s.u1,
+			slug: "not_exist_slug",
+			msg:  database.ErrRecordNotFound.Error(),
+		}, {
+			name: "not found by author",
+			user: s.u2,
+			slug: exist.Slug,
+			msg:  database.ErrRecordNotFound.Error(),
+		},
+	}
+
+	for _, tc := range cases {
+		s.T().Run(tc.name, func(t *testing.T) {
+			err := s.db.DeleteBySlug(context.TODO(), tc.user, tc.slug)
+			// then
+			assert.Error(t, err)
+			assert.Contains(t, err.Error(), tc.msg)
+		})
+	}
+}
+
+func newArticle(title, description, body string, author userModel.User, tagValues []string) *model.Article {
+	var tags []*model.Tag
+	for _, value := range tagValues {
+		tags = append(tags, &model.Tag{Name: value})
+	}
+
+	return &model.Article{
+		Slug:        title,
+		Title:       title,
+		Description: description,
+		Body:        body,
+		Author:      author,
+		Tags:        tags,
+	}
 }

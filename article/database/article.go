@@ -101,16 +101,14 @@ func (adb *articleDB) Update(ctx context.Context, user *userModel.User, a *model
 }
 
 func (adb *articleDB) DeleteBySlug(ctx context.Context, user *userModel.User, slug string) error {
-	var (
-		logger = logging.FromContext(ctx)
-		userID = uint(0)
-	)
-	if user != nil {
-		userID = user.ID
+	logger := logging.FromContext(ctx)
+	if user == nil {
+		logger.Error("ArticleDB_DeleteBySlug no user")
+		return database.WrapError(gorm.ErrRecordNotFound)
 	}
-	logger.Debugw("ArticleDB_DeleteBySlug try to delete an article", "userID", userID, "slug", slug)
+	logger.Debugw("ArticleDB_DeleteBySlug try to delete an article", "userID", user.ID, "slug", slug)
 
-	result := adb.db.Model(new(model.Article)).Delete("slug = ? AND author_id = ?", slug, userID)
+	result := adb.db.Where("slug = ? AND author_id = ?", slug, user.ID).Delete(&model.Article{})
 	if result.Error != nil {
 		logger.Errorw("ArticleDB_DeleteBySlug failed to delete", "err", result.Error)
 		return database.WrapError(result.Error)

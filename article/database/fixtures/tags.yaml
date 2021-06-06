@@ -1,0 +1,12 @@
+- tag_id: 1
+  created_at: RAW=NOW()
+  name: tag1
+- tag_id: 2
+  created_at: RAW=NOW()
+  name: tag2
+- tag_id: 3
+  created_at: RAW=NOW()
+  name: tag3
+- tag_id: 4
+  created_at: RAW=NOW()
+  name: tag4
