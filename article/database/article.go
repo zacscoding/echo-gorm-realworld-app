@@ -13,6 +13,7 @@ import (
 //go:generate mockery --name ArticleDB --filename article_mock.go
 type ArticleDB interface {
 	ArticleQueryDB
+	CommentDB
 
 	// Save saves a given article a and saves tags in article a.
 	// database.ErrKeyConflict will return if duplicate emails.
@@ -42,6 +43,19 @@ type ArticleQueryDB interface {
 	// FindArticlesByAuthors returns ([]*model.Articles, total count, error) from given author ids.
 	// each articles contains Author, Tags, FavoritesCount and Favorited.
 	FindArticlesByAuthors(ctx context.Context, user *userModel.User, authors []uint, offset, limit int) (*model.Articles, error)
+}
+
+type CommentDB interface {
+	// SaveComment saves a given comment c.
+	// database.ErrFKConstraint will be returned if not exist article id or author id.
+	SaveComment(ctx context.Context, c *model.Comment) error
+
+	// FindCommentsByArticleID returns ([]*model.Comments, error) from given article id.
+	FindCommentsByArticleID(ctx context.Context, articleID uint) ([]*model.Comment, error)
+
+	// DeleteCommentByID deletes a comment matched by user'id and comment id.
+	// database.ErrRecordNotFound will be returned if zero row affected.
+	DeleteCommentByID(ctx context.Context, user *userModel.User, commentID uint) error
 }
 
 // NewArticleDB creates a new ArticleDB with given gorm.DB

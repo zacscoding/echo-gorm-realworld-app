@@ -42,6 +42,7 @@ func (s *Suite) TearDownSuite() {
 
 func (s *Suite) SetupTest() {
 	err := database.DeleteRecordAll(s.T(), s.originDB, []string{
+		model.TableNameComment, "comment_id > 0",
 		model.TableNameArticleFavorite, "user_id > 0",
 		model.TableNameArticleTag, "article_id > 0",
 		model.TableNameArticle, "article_id > 0",
@@ -101,8 +102,8 @@ func (s *Suite) TestSaveFail() {
 	for _, tc := range cases {
 		s.T().Run(tc.name, func(t *testing.T) {
 			err := s.db.Save(context.TODO(), tc.article)
-			s.Error(err)
-			s.Contains(err.Error(), tc.msg)
+			assert.Error(t, err)
+			assert.Contains(t, err.Error(), tc.msg)
 		})
 	}
 }
