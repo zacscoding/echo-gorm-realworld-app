@@ -4,7 +4,7 @@ import "go.uber.org/zap/zapcore"
 
 var defaultCfg = &Config{
 	Encoding:    "console",
-	Level:       zapcore.DebugLevel,
+	Level:       zapcore.InfoLevel,
 	Development: true,
 }
 
