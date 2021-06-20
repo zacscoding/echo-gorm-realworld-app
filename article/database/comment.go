@@ -20,7 +20,7 @@ func (adb *articleDB) SaveComment(ctx context.Context, c *model.Comment) error {
 		return errors.New("require article id and author id")
 	}
 
-	if err := adb.db.Create(c).Error; err != nil {
+	if err := adb.db.WithContext(ctx).Create(c).Error; err != nil {
 		logger.Errorw("CommentDB_SaveComment failed to save a comment", "c", c, "err", err)
 		return database.WrapError(err)
 	}
@@ -32,7 +32,7 @@ func (adb *articleDB) FindCommentsByArticleID(ctx context.Context, articleID uin
 	logger.Debugw("CommentDB_FindCommentsByArticleID try to find comments by article id", "articleID", articleID)
 
 	var comments []*model.Comment
-	if err := adb.db.Model(new(model.Comment)).
+	if err := adb.db.WithContext(ctx).Model(new(model.Comment)).
 		Joins("Author").
 		Where("article_id = ?", articleID).
 		Order("created_at DESC").
@@ -51,7 +51,7 @@ func (adb *articleDB) DeleteCommentByID(ctx context.Context, user *userModel.Use
 	}
 	logger.Debugw("CommentDB_DeleteCommentByID try to delete a comment", "userID", user.ID, "commentID", commentID)
 
-	result := adb.db.Where("comment_id = ? AND author_id = ?", commentID, user.ID).Delete(&model.Comment{})
+	result := adb.db.WithContext(ctx).Where("comment_id = ? AND author_id = ?", commentID, user.ID).Delete(&model.Comment{})
 	if result.Error != nil {
 		logger.Errorw("CommentDB_DeleteCommentByID failed to delete", "err", result.Error)
 		return database.WrapError(result.Error)

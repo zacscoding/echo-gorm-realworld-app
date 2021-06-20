@@ -1,10 +1,13 @@
-.PHONY: docs generate test cleantests
+.PHONY: docs generate test lint cleantests
 
 cleantests:
 	go clean -testcache
 
 test:
 	go test ./...
+
+lint:
+	gofmt -d .
 
 generate:
 	go generate ./...

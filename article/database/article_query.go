@@ -63,14 +63,14 @@ func (adb *articleDB) FindArticlesByQuery(ctx context.Context, user *userModel.U
 	}
 
 	// find article ids from given query and offset, limit.
-	ids, err := articleIdsByQuery(adb.db, query, offset, limit)
+	ids, err := articleIdsByQuery(ctx, adb.db, query, offset, limit)
 	if err != nil {
 		logger.Error("ArticleDB_FindArticlesByQuery failed to fetch article ids", "userID", userID, "query", query, "offset", offset, "limit", limit, "err", err)
 		return nil, database.WrapError(err)
 	}
 
 	// find total count from given query.
-	total, err := countArticleByQuery(adb.db, query)
+	total, err := countArticleByQuery(ctx, adb.db, query)
 	if err != nil {
 		logger.Error("ArticleDB_FindArticlesByQuery failed to fetch total count", "userID", userID, "query", query, "err", err)
 		return nil, database.WrapError(err)
@@ -249,8 +249,8 @@ func setFavoritedBulk(db *gorm.DB, user *userModel.User, articles []*model.Artic
 }
 
 // articleIdsByQuery returns article ids from given query and offset, limit.
-func articleIdsByQuery(db *gorm.DB, query model.ArticleQuery, offset, limit int) ([]uint, error) {
-	db = buildArticleQuery(db, query)
+func articleIdsByQuery(ctx context.Context, db *gorm.DB, query model.ArticleQuery, offset, limit int) ([]uint, error) {
+	db = buildArticleQuery(ctx, db, query)
 	rows, err := db.Select("DISTINCT a.article_id, a.created_at").
 		Where("a.deleted_at IS NULL").
 		Order("a.created_at DESC").
@@ -289,8 +289,8 @@ func articleIdsByAuthors(db *gorm.DB, authors []uint, offset, limit int) ([]uint
 	return ids, nil
 }
 
-func countArticleByQuery(db *gorm.DB, query model.ArticleQuery) (int64, error) {
-	db = buildArticleQuery(db, query)
+func countArticleByQuery(ctx context.Context, db *gorm.DB, query model.ArticleQuery) (int64, error) {
+	db = buildArticleQuery(ctx, db, query)
 	var count int64
 	return count, db.Distinct("a.article_id").Count(&count).Error
 }
@@ -300,8 +300,8 @@ func countArticleByAuthors(db *gorm.DB, authors []uint) (int64, error) {
 	return count, db.Model(new(model.Article)).Where("author_id IN (?)", authors).Count(&count).Error
 }
 
-func buildArticleQuery(db *gorm.DB, query model.ArticleQuery) *gorm.DB {
-	db = db.Table("articles a").
+func buildArticleQuery(ctx context.Context, db *gorm.DB, query model.ArticleQuery) *gorm.DB {
+	db = db.WithContext(ctx).Table("articles a").
 		Joins("LEFT JOIN article_tags at ON at.article_id = a.article_id").
 		Joins("LEFT JOIN tags t ON t.tag_id = at.tag_id").
 		Joins("LEFT JOIN article_favorites af ON af.article_id = a.article_id").

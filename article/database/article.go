@@ -82,11 +82,11 @@ func (adb *articleDB) Save(ctx context.Context, a *model.Article) error {
 	if err := database.RunInTx(ctx, adb.db, opts, func(txDb *gorm.DB) error {
 		// find tags and creates if not exists.
 		for _, tag := range a.Tags {
-			if err := txDb.FirstOrCreate(tag, "name = ?", tag.Name).Error; err != nil {
+			if err := txDb.WithContext(ctx).FirstOrCreate(tag, "name = ?", tag.Name).Error; err != nil {
 				return err
 			}
 		}
-		return txDb.Create(a).Error
+		return txDb.WithContext(ctx).Create(a).Error
 	}); err != nil {
 		logger.Errorw("ArticleDB_Save failed to save an article", "err", err)
 		return database.WrapError(err)
@@ -122,7 +122,7 @@ func (adb *articleDB) DeleteBySlug(ctx context.Context, user *userModel.User, sl
 	}
 	logger.Debugw("ArticleDB_DeleteBySlug try to delete an article", "userID", user.ID, "slug", slug)
 
-	result := adb.db.Where("slug = ? AND author_id = ?", slug, user.ID).Delete(&model.Article{})
+	result := adb.db.WithContext(ctx).Where("slug = ? AND author_id = ?", slug, user.ID).Delete(&model.Article{})
 	if result.Error != nil {
 		logger.Errorw("ArticleDB_DeleteBySlug failed to delete", "err", result.Error)
 		return database.WrapError(result.Error)
