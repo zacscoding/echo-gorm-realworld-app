@@ -38,6 +38,29 @@ func (_m *UserDB) FindByEmail(ctx context.Context, email string) (*model.User, e
 	return r0, r1
 }
 
+// FindByID provides a mock function with given fields: ctx, userID
+func (_m *UserDB) FindByID(ctx context.Context, userID uint) (*model.User, error) {
+	ret := _m.Called(ctx, userID)
+
+	var r0 *model.User
+	if rf, ok := ret.Get(0).(func(context.Context, uint) *model.User); ok {
+		r0 = rf(ctx, userID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.User)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, uint) error); ok {
+		r1 = rf(ctx, userID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // Follow provides a mock function with given fields: ctx, userID, followerID
 func (_m *UserDB) Follow(ctx context.Context, userID uint, followerID uint) error {
 	ret := _m.Called(ctx, userID, followerID)

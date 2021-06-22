@@ -1,9 +1,13 @@
 package serverenv
 
-import "gorm.io/gorm"
+import (
+	userDB "github.com/zacscoding/echo-gorm-realworld-app/user/database"
+	"gorm.io/gorm"
+)
 
 type ServerEnv struct {
-	db *gorm.DB
+	db     *gorm.DB
+	userDB userDB.UserDB
 }
 
 type Option func(env *ServerEnv)
@@ -24,7 +28,24 @@ func WithDB(db *gorm.DB) Option {
 	}
 }
 
+// WithUserDB sets database.UserDB to ServerEnv.
+func WithUserDB(userDB userDB.UserDB) Option {
+	return func(env *ServerEnv) {
+		env.userDB = userDB
+	}
+}
+
+// GetDB returns a gorm.DB in ServerEnv.
+func (se *ServerEnv) GetDB() *gorm.DB {
+	return se.db
+}
+
+// GetUserDB returns a database.UserDB in ServerEnv.
+func (se *ServerEnv) GetUserDB() userDB.UserDB {
+	return se.userDB
+}
+
 // Close shuts down this server environments.
-func (e *ServerEnv) Close() error {
+func (se *ServerEnv) Close() error {
 	return nil
 }

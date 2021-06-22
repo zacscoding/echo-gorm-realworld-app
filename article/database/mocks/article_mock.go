@@ -31,6 +31,20 @@ func (_m *ArticleDB) DeleteBySlug(ctx context.Context, user *model.User, slug st
 	return r0
 }
 
+// DeleteCommentByID provides a mock function with given fields: ctx, user, commentID
+func (_m *ArticleDB) DeleteCommentByID(ctx context.Context, user *model.User, commentID uint) error {
+	ret := _m.Called(ctx, user, commentID)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, *model.User, uint) error); ok {
+		r0 = rf(ctx, user, commentID)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // FindArticlesByAuthors provides a mock function with given fields: ctx, user, authors, offset, limit
 func (_m *ArticleDB) FindArticlesByAuthors(ctx context.Context, user *model.User, authors []uint, offset int, limit int) (*articlemodel.Articles, error) {
 	ret := _m.Called(ctx, user, authors, offset, limit)
@@ -100,6 +114,29 @@ func (_m *ArticleDB) FindBySlug(ctx context.Context, user *model.User, slug stri
 	return r0, r1
 }
 
+// FindCommentsByArticleID provides a mock function with given fields: ctx, articleID
+func (_m *ArticleDB) FindCommentsByArticleID(ctx context.Context, articleID uint) ([]*articlemodel.Comment, error) {
+	ret := _m.Called(ctx, articleID)
+
+	var r0 []*articlemodel.Comment
+	if rf, ok := ret.Get(0).(func(context.Context, uint) []*articlemodel.Comment); ok {
+		r0 = rf(ctx, articleID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*articlemodel.Comment)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, uint) error); ok {
+		r1 = rf(ctx, articleID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // Save provides a mock function with given fields: ctx, a
 func (_m *ArticleDB) Save(ctx context.Context, a *articlemodel.Article) error {
 	ret := _m.Called(ctx, a)
@@ -107,6 +144,20 @@ func (_m *ArticleDB) Save(ctx context.Context, a *articlemodel.Article) error {
 	var r0 error
 	if rf, ok := ret.Get(0).(func(context.Context, *articlemodel.Article) error); ok {
 		r0 = rf(ctx, a)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// SaveComment provides a mock function with given fields: ctx, c
+func (_m *ArticleDB) SaveComment(ctx context.Context, c *articlemodel.Comment) error {
+	ret := _m.Called(ctx, c)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, *articlemodel.Comment) error); ok {
+		r0 = rf(ctx, c)
 	} else {
 		r0 = ret.Error(0)
 	}

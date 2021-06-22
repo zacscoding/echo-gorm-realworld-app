@@ -10,6 +10,7 @@ import (
 	"github.com/zacscoding/echo-gorm-realworld-app/user/model"
 	"go.uber.org/zap/zapcore"
 	"gorm.io/gorm"
+	"math"
 	"math/rand"
 	"testing"
 	"time"
@@ -100,6 +101,46 @@ func (s *Suite) TestSave() {
 				return
 			}
 			assert.NoError(t, err)
+		})
+	}
+}
+
+func (s *Suite) TestFindByID() {
+	cases := []struct {
+		name     string
+		id       uint
+		assertFn func(t *testing.T, u *model.User)
+		msg      string
+	}{
+		{
+			name: "exist",
+			id:   defaultUser.ID,
+			assertFn: func(t *testing.T, u *model.User) {
+				assert.Greater(t, u.ID, uint(0))
+				assert.Equal(t, defaultUser.Name, u.Name)
+				assert.Equal(t, defaultUser.Password, u.Password)
+				assert.Equal(t, defaultUser.Bio, u.Bio)
+				assert.Equal(t, defaultUser.Image, u.Image)
+				assert.WithinDuration(t, defaultUser.CreatedAt, u.CreatedAt, time.Minute)
+				assert.WithinDuration(t, defaultUser.UpdatedAt, u.UpdatedAt, time.Minute)
+				assert.False(t, u.Disabled)
+			},
+		}, {
+			name: "not found",
+			id:   math.MaxInt8,
+			msg:  database.ErrRecordNotFound.Error(),
+		},
+	}
+
+	for _, tc := range cases {
+		s.T().Run(tc.name, func(t *testing.T) {
+			u, err := s.db.FindByID(context.TODO(), tc.id)
+			if tc.msg != "" {
+				assert.Error(t, err)
+				assert.Contains(t, err.Error(), tc.msg)
+				return
+			}
+			tc.assertFn(t, u)
 		})
 	}
 }

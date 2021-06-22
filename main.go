@@ -4,9 +4,14 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/zacscoding/echo-gorm-realworld-app/config"
 	"github.com/zacscoding/echo-gorm-realworld-app/logging"
 	"github.com/zacscoding/echo-gorm-realworld-app/serverenv"
+	"github.com/zacscoding/echo-gorm-realworld-app/user"
+	"github.com/zacscoding/echo-gorm-realworld-app/utils/authutils"
+	"github.com/zacscoding/echo-gorm-realworld-app/utils/httputils"
 	"log"
 )
 
@@ -28,6 +33,28 @@ func main() {
 		logging.DefaultLogger().Fatalw("failed to setup server environments", "err", err)
 	}
 
-	// TODO : setup server
-	fmt.Println(serverEnv)
+	// TODO: temporary server code.
+	e := echo.New()
+	e.Use(middleware.Recover())
+	e.Validator = httputils.NewValidator()
+	v1 := e.Group("/api")
+	authMiddleware := middleware.JWTWithConfig(
+		middleware.JWTConfig{
+			TokenLookup: "header:Authorization",
+			Claims:      &authutils.JWTClaims{},
+			SigningKey:  []byte(cfg.JWTConfig.Secret),
+			ErrorHandler: func(err error) error {
+				return httputils.NewUnauthorized()
+			},
+		},
+	)
+	userHandler, err := user.NewHandler(serverEnv, cfg)
+	if err != nil {
+		logging.DefaultLogger().Fatalw("failed to initialize user handler", "err", err)
+	}
+	userHandler.Route(v1, authMiddleware)
+
+	if e.Start(fmt.Sprintf(":%d", cfg.ServerConfig.Port)); err != nil {
+		logging.DefaultLogger().Fatalw("shutting down server", "err", err)
+	}
 }

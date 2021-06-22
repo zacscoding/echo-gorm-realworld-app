@@ -19,6 +19,10 @@ type UserDB interface {
 	// database.ErrRecordNotFound will be returned if not exists.
 	Update(ctx context.Context, u *model.User) error
 
+	// FindByID returns a model.User if exists with given userID.
+	// database.ErrRecordNotFound will be returned if not exists.
+	FindByID(ctx context.Context, userID uint) (*model.User, error)
+
 	// FindByEmail returns a model.User if exists with given email.
 	// database.ErrRecordNotFound will be returned if not exists.
 	FindByEmail(ctx context.Context, email string) (*model.User, error)
@@ -80,6 +84,21 @@ func (db *userDB) Update(ctx context.Context, u *model.User) error {
 		return database.WrapError(gorm.ErrRecordNotFound)
 	}
 	return nil
+}
+
+func (db *userDB) FindByID(ctx context.Context, userID uint) (*model.User, error) {
+	logger := logging.FromContext(ctx)
+	logger.Debugw("UserDB_FindByID try to find an user", "userID", userID)
+
+	var u model.User
+	if err := db.db.WithContext(ctx).First(&u, "user_id = ?", userID).Error; err != nil {
+		logger.Errorw("UserDB_FindByID failed to find an user", "err", err)
+		return nil, database.WrapError(err)
+	}
+	if u.Disabled {
+		return nil, database.WrapError(gorm.ErrRecordNotFound)
+	}
+	return &u, nil
 }
 
 func (db *userDB) FindByEmail(ctx context.Context, email string) (*model.User, error) {
