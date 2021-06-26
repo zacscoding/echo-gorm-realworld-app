@@ -145,6 +145,46 @@ func (s *Suite) TestFindByID() {
 	}
 }
 
+func (s *Suite) TestFindByUsername() {
+	cases := []struct {
+		name     string
+		username string
+		assertFn func(t *testing.T, u *model.User)
+		msg      string
+	}{
+		{
+			name:     "exist",
+			username: defaultUser.Name,
+			assertFn: func(t *testing.T, u *model.User) {
+				assert.Greater(t, u.ID, uint(0))
+				assert.Equal(t, defaultUser.Name, u.Name)
+				assert.Equal(t, defaultUser.Password, u.Password)
+				assert.Equal(t, defaultUser.Bio, u.Bio)
+				assert.Equal(t, defaultUser.Image, u.Image)
+				assert.WithinDuration(t, defaultUser.CreatedAt, u.CreatedAt, time.Minute)
+				assert.WithinDuration(t, defaultUser.UpdatedAt, u.UpdatedAt, time.Minute)
+				assert.False(t, u.Disabled)
+			},
+		}, {
+			name:     "not found",
+			username: "notfounduser@@",
+			msg:      database.ErrRecordNotFound.Error(),
+		},
+	}
+
+	for _, tc := range cases {
+		s.T().Run(tc.name, func(t *testing.T) {
+			u, err := s.db.FindByName(context.TODO(), tc.username)
+			if tc.msg != "" {
+				assert.Error(t, err)
+				assert.Contains(t, err.Error(), tc.msg)
+				return
+			}
+			tc.assertFn(t, u)
+		})
+	}
+}
+
 func (s *Suite) TestFindByEmail() {
 	cases := []struct {
 		name     string
@@ -256,6 +296,19 @@ func (s *Suite) TestFollow() {
 
 	err = s.db.Follow(context.TODO(), u1.ID, 10000)
 	s.Equal(database.ErrFKConstraint, err)
+}
+
+func (s *Suite) TestIsFollow() {
+	u1, u2 := defaultUser, defaultUser2
+	s.NoError(s.db.Follow(context.TODO(), u1.ID, u2.ID))
+
+	following, err := s.db.IsFollow(context.TODO(), u1.ID, u2.ID)
+	s.NoError(err)
+	s.True(following)
+
+	following, err = s.db.IsFollow(context.TODO(), u2.ID, u1.ID)
+	s.NoError(err)
+	s.False(following)
 }
 
 func (s *Suite) TestUnFollow() {

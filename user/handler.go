@@ -1,6 +1,7 @@
 package user
 
 import (
+	"context"
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/zacscoding/echo-gorm-realworld-app/api/types"
@@ -13,6 +14,7 @@ import (
 	"github.com/zacscoding/echo-gorm-realworld-app/utils/authutils"
 	"github.com/zacscoding/echo-gorm-realworld-app/utils/hashutils"
 	"github.com/zacscoding/echo-gorm-realworld-app/utils/httputils"
+	"go.uber.org/zap"
 	"net/http"
 	"time"
 )
@@ -40,19 +42,22 @@ func NewHandler(env *serverenv.ServerEnv, cfg *config.Config) (*Handler, error) 
 
 func (h *Handler) Route(e *echo.Group, authMiddleware echo.MiddlewareFunc) {
 	// anonymous
-	anonymousGroup := e.Group("/users")
-	anonymousGroup.POST("/login", h.handleSignIn)
-	anonymousGroup.POST("", h.handleSignUp)
+	anonymousUserGroup := e.Group("/users")
+	anonymousUserGroup.POST("/login", h.handleSignIn)
+	anonymousUserGroup.POST("", h.handleSignUp)
 
 	// auth required
 	userGroup := e.Group("/user")
 	userGroup.Use(authMiddleware)
-	userGroup.PUT("", h.handleUpdateUser)
 	userGroup.GET("", h.handleCurrentUser)
+	userGroup.PUT("", h.handleUpdateUser)
+
 	// TODO: add profiles
-	// GET /api/profiles/:username
-	// POST /api/profiles/:username/follow
-	// DELETE /api/profiles/:username/follow
+	profileGroup := e.Group("/profile")
+	profileGroup.Use(authMiddleware)
+	profileGroup.GET("/:username", h.handleGetProfile)
+	profileGroup.POST("/:username/follow", h.handleFollow)
+	profileGroup.DELETE("/:username/follow", h.handleUnfollow)
 }
 
 // handleSignUp handles "POST /api/users" to register a new user.
@@ -114,7 +119,7 @@ func (h *Handler) handleCurrentUser(c echo.Context) error {
 	user, err := h.userDB.FindByID(ctx, authutils.CurrentUser(c))
 	if err != nil {
 		logger.Errorw("UserHandler_handleUpdateUser failed to find an user", "err", err)
-		return httputils.NewInternalServerError(nil)
+		return httputils.NewInternalServerError(err)
 	}
 	return h.responseUser(c, user)
 }
@@ -143,6 +148,85 @@ func (h *Handler) handleUpdateUser(c echo.Context) error {
 		return httputils.NewInternalServerError(err)
 	}
 	return h.responseUser(c, user)
+}
+
+func (h *Handler) handleGetProfile(c echo.Context) error {
+	var (
+		logger   = logging.FromContext(c.Request().Context())
+		ctx      = c.Request().Context()
+		username = c.Param("username")
+	)
+
+	user, err := h.getUserByUsername(ctx, logger, username)
+	if err != nil {
+		return err
+	}
+
+	currentUserID := authutils.CurrentUser(c)
+	if currentUserID != 0 && currentUserID != user.ID {
+		isFollow, err := h.userDB.IsFollow(ctx, currentUserID, user.ID)
+		if err != nil {
+			logger.Errorw("UserHandler_handleGetProfile failed to find the following relation",
+				"userID", currentUserID, "followID", user.ID, "err", err)
+			return httputils.NewInternalServerError(err)
+		}
+		user.Following = isFollow
+	}
+	return c.JSON(http.StatusOK, types.ToUserProfile(user))
+}
+
+func (h *Handler) handleFollow(c echo.Context) error {
+	var (
+		logger   = logging.FromContext(c.Request().Context())
+		ctx      = c.Request().Context()
+		username = c.Param("username")
+	)
+	user, err := h.getUserByUsername(ctx, logger, username)
+	if err != nil {
+		return err
+	}
+	currentUserID := authutils.CurrentUser(c)
+	if err := h.userDB.Follow(ctx, currentUserID, user.ID); err != nil {
+		logger.Errorw("UserHandler_handleFollow", "failed to update follow relation", "userID", currentUserID,
+			"followID", user.ID, "err", err)
+		return httputils.NewInternalServerError(err)
+	}
+	user.Following = true
+	return c.JSON(http.StatusOK, types.ToUserProfile(user))
+}
+
+func (h *Handler) handleUnfollow(c echo.Context) error {
+	var (
+		logger   = logging.FromContext(c.Request().Context())
+		ctx      = c.Request().Context()
+		username = c.Param("username")
+	)
+	user, err := h.getUserByUsername(ctx, logger, username)
+	if err != nil {
+		return err
+	}
+	currentUserID := authutils.CurrentUser(c)
+	if err := h.userDB.UnFollow(ctx, currentUserID, user.ID); err != nil {
+		logger.Errorw("UserHandler_handleFollow failed to update unfollow relation", "userID", currentUserID, "followID", user.ID, "err", err)
+		if err == database.ErrRecordNotFound {
+			return httputils.NewNotFoundError(fmt.Sprintf("user already unfollowing user(%s)", username))
+		}
+		return httputils.NewInternalServerError(err)
+	}
+	user.Following = false
+	return c.JSON(http.StatusOK, types.ToUserProfile(user))
+}
+
+func (h *Handler) getUserByUsername(ctx context.Context, logger *zap.SugaredLogger, username string) (*userModel.User, error) {
+	user, err := h.userDB.FindByName(ctx, username)
+	if err != nil {
+		logger.Errorw("UserHandler_getUserByUsername failed to find an user", "err", err)
+		if err == database.ErrRecordNotFound {
+			return nil, httputils.NewNotFoundError(fmt.Sprintf("user(%s) not found", username))
+		}
+		return nil, httputils.NewInternalServerError(err)
+	}
+	return user, nil
 }
 
 func (h *Handler) responseUser(c echo.Context, user *userModel.User) error {

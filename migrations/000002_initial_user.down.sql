@@ -1,0 +1,1 @@
+DELETE FROM users WHERE user_id IN (1);

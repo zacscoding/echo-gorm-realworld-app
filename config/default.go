@@ -7,7 +7,7 @@ var defaultConfig = map[string]interface{}{
 	"server.writeTimeout": "10s",
 
 	"jwt.secret":         "secret-key",
-	"jwt.sessionTimeout": "864000s",
+	"jwt.sessionTimeout": "240h",
 
 	"db.dataSourceName":   "root:password@tcp(127.0.0.1:3306)/local_db?charset=utf8&parseTime=True&multiStatements=true",
 	"db.migrate.enable":   false,

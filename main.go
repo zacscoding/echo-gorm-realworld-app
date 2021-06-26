@@ -38,12 +38,22 @@ func main() {
 	e.Use(middleware.Recover())
 	e.Validator = httputils.NewValidator()
 	v1 := e.Group("/api")
+	optionalAuthPath := map[string]struct{}{
+		"/api/profile/:username": {},
+	}
 	authMiddleware := middleware.JWTWithConfig(
 		middleware.JWTConfig{
+			Skipper: func(ctx echo.Context) bool {
+				if _, ok := optionalAuthPath[ctx.Path()]; !ok {
+					return false
+				}
+				return ctx.Request().Header.Get("Authorization") == ""
+			},
 			TokenLookup: "header:Authorization",
 			Claims:      &authutils.JWTClaims{},
 			SigningKey:  []byte(cfg.JWTConfig.Secret),
-			ErrorHandler: func(err error) error {
+			ErrorHandlerWithContext: func(err error, ctx echo.Context) error {
+				logging.FromContext(ctx.Request().Context()).Errorw("auth failed", "err", err)
 				return httputils.NewUnauthorized()
 			},
 		},

@@ -33,7 +33,7 @@ type UserProfile struct {
 		Bio       string `json:"bio"`
 		Image     string `json:"image"`
 		Following bool   `json:"following"`
-	}
+	} `json:"profile"`
 }
 
 // ToUserProfile converts given model.User to UserProfile.

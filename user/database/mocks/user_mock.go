@@ -61,6 +61,29 @@ func (_m *UserDB) FindByID(ctx context.Context, userID uint) (*model.User, error
 	return r0, r1
 }
 
+// FindByName provides a mock function with given fields: ctx, username
+func (_m *UserDB) FindByName(ctx context.Context, username string) (*model.User, error) {
+	ret := _m.Called(ctx, username)
+
+	var r0 *model.User
+	if rf, ok := ret.Get(0).(func(context.Context, string) *model.User); ok {
+		r0 = rf(ctx, username)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.User)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, username)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // Follow provides a mock function with given fields: ctx, userID, followerID
 func (_m *UserDB) Follow(ctx context.Context, userID uint, followerID uint) error {
 	ret := _m.Called(ctx, userID, followerID)
@@ -73,6 +96,27 @@ func (_m *UserDB) Follow(ctx context.Context, userID uint, followerID uint) erro
 	}
 
 	return r0
+}
+
+// IsFollow provides a mock function with given fields: ctx, userID, followerID
+func (_m *UserDB) IsFollow(ctx context.Context, userID uint, followerID uint) (bool, error) {
+	ret := _m.Called(ctx, userID, followerID)
+
+	var r0 bool
+	if rf, ok := ret.Get(0).(func(context.Context, uint, uint) bool); ok {
+		r0 = rf(ctx, userID, followerID)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, uint, uint) error); ok {
+		r1 = rf(ctx, userID, followerID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // Save provides a mock function with given fields: ctx, u

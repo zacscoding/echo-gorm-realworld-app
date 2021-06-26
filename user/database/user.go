@@ -23,6 +23,10 @@ type UserDB interface {
 	// database.ErrRecordNotFound will be returned if not exists.
 	FindByID(ctx context.Context, userID uint) (*model.User, error)
 
+	// FindByName returns a model.User if exists with given username.
+	// database.ErrRecordNotFound will be returned if not exists.
+	FindByName(ctx context.Context, username string) (*model.User, error)
+
 	// FindByEmail returns a model.User if exists with given email.
 	// database.ErrRecordNotFound will be returned if not exists.
 	FindByEmail(ctx context.Context, email string) (*model.User, error)
@@ -31,6 +35,9 @@ type UserDB interface {
 	// database.ErrKeyConflict will be returned if already followed.
 	// database.ErrFKConstraint will be returned if not exist followerID.
 	Follow(ctx context.Context, userID, followerID uint) error
+
+	// IsFollow returns a true if userID follows followerID, otherwise false.
+	IsFollow(ctx context.Context, userID, followerID uint) (bool, error)
 
 	// UnFollow unfollows given userID to followerID.
 	// database.ErrRecordNotFound will be returned if user does not follow.
@@ -116,6 +123,21 @@ func (db *userDB) FindByEmail(ctx context.Context, email string) (*model.User, e
 	return &u, nil
 }
 
+func (db *userDB) FindByName(ctx context.Context, username string) (*model.User, error) {
+	logger := logging.FromContext(ctx)
+	logger.Debugw("UserDB_FindByName try to find an user", "username", username)
+
+	var u model.User
+	if err := db.db.WithContext(ctx).First(&u, "name = ?", username).Error; err != nil {
+		logger.Errorw("UserDB_FindByName failed to find an user", "err", err)
+		return nil, database.WrapError(err)
+	}
+	if u.Disabled {
+		return nil, database.WrapError(gorm.ErrRecordNotFound)
+	}
+	return &u, nil
+}
+
 func (db *userDB) Follow(ctx context.Context, userID, followerID uint) error {
 	logger := logging.FromContext(ctx)
 	logger.Debugw("UserDB_Follow try to insert the following relation", "userID", userID, "followerID", followerID)
@@ -128,6 +150,20 @@ func (db *userDB) Follow(ctx context.Context, userID, followerID uint) error {
 		return database.WrapError(err)
 	}
 	return nil
+}
+
+func (db *userDB) IsFollow(ctx context.Context, userID, followerID uint) (bool, error) {
+	logger := logging.FromContext(ctx)
+	logger.Debugw("UserDB_Follow try to check the following relation", "userID", userID, "followerID", followerID)
+
+	var count int64
+	if err := db.db.WithContext(ctx).Model(new(model.Follow)).
+		Where("user_id = ? AND follow_id = ?", userID, followerID).
+		Count(&count).Error; err != nil {
+		logger.Errorw("UserDB_Follow failed to find the following relation", "err", err)
+		return false, database.WrapError(err)
+	}
+	return count == 1, nil
 }
 
 func (db *userDB) UnFollow(ctx context.Context, userID, followerID uint) error {
