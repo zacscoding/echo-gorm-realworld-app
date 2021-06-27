@@ -1,6 +1,8 @@
 package httputils
 
 import (
+	"fmt"
+	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -9,20 +11,26 @@ type Error struct {
 	Errors map[string]interface{} `json:"errors"`
 }
 
-// WrapBindError wraps given error to echo.HTTPError
+// WrapBindError wraps given validation error to echo.HTTPError.
+// If possible to cast validator.ValidationErrors, then use first error elts with http.StatusUnprocessableEntity
+// otherwise return err's message with http.StatusInternalServerError
 func WrapBindError(err error) error {
-	// TODO: implement me
-	return err
+	verrs, ok := err.(validator.ValidationErrors)
+	if !ok || len(verrs) == 0 {
+		return NewError(http.StatusInternalServerError, err.Error())
+	}
+	msg := fmt.Sprintf("%s validation error. reason: %s", verrs[0].Field(), verrs[0].Tag())
+	return NewError(http.StatusUnprocessableEntity, msg)
 }
 
 // NewUnauthorized returns echo.HTTPError with 401 Unauthorized and given message.
 func NewUnauthorized() error {
-	return newError(http.StatusUnauthorized, "auth required")
+	return NewError(http.StatusUnauthorized, "auth required")
 }
 
 // NewStatusUnprocessableEntity returns echo.HTTPError with 422 Unprocessable Entity and given message.
 func NewStatusUnprocessableEntity(msg string) error {
-	return newError(http.StatusUnprocessableEntity, msg)
+	return NewError(http.StatusUnprocessableEntity, msg)
 }
 
 // NewNotFoundError returns echo.HTTPError with 404 Not found and given message.
@@ -31,7 +39,7 @@ func NewNotFoundError(msg string) error {
 	if msg == "" {
 		msg = "resource not found"
 	}
-	return newError(http.StatusNotFound, msg)
+	return NewError(http.StatusNotFound, msg)
 }
 
 // NewInternalServerError returns echo.HTTPError with 500 internal server error and given error's message.
@@ -41,10 +49,10 @@ func NewInternalServerError(err error) error {
 	if err != nil {
 		msg = err.Error()
 	}
-	return newError(http.StatusInternalServerError, msg)
+	return NewError(http.StatusInternalServerError, msg)
 }
 
-func newError(statusCode int, msg string) error {
+func NewError(statusCode int, msg string) error {
 	return echo.NewHTTPError(statusCode, &Error{
 		Errors: map[string]interface{}{
 			"body": msg,
