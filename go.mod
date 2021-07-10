@@ -13,6 +13,7 @@ require (
 	github.com/google/go-cmp v0.5.6 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/jeremywohl/flatten v1.0.1
+	github.com/jinzhu/copier v0.3.2
 	github.com/knadh/koanf v1.1.0
 	github.com/kr/text v0.2.0 // indirect
 	github.com/labstack/echo/v4 v4.3.0

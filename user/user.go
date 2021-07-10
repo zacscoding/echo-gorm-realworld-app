@@ -21,11 +21,13 @@ func (h *Handler) handleSignUp(c echo.Context) error {
 		req    = &SignUpRequest{}
 		user   userModel.User
 	)
+
 	// Bind request
 	if err := req.Bind(c, &user); err != nil {
 		logger.Errorw("UserHandler_handlePostUser failed to bind register request", "err", err)
 		return httputils.WrapBindError(err)
 	}
+
 	// Save given user
 	if err := h.userDB.Save(ctx, &user); err != nil {
 		if err == database.ErrKeyConflict {
@@ -43,11 +45,13 @@ func (h *Handler) handleSignIn(c echo.Context) error {
 		logger = logging.FromContext(ctx)
 		req    = &SignInRequest{}
 	)
+
 	// Bind request
 	if err := req.Bind(c); err != nil {
 		logger.Errorw("UserHandler_handleSignIn failed to bind register request", "err", err)
 		return httputils.WrapBindError(err)
 	}
+
 	// Find an user from given email
 	user, err := h.userDB.FindByEmail(ctx, req.User.Email)
 	if err != nil {
@@ -57,6 +61,7 @@ func (h *Handler) handleSignIn(c echo.Context) error {
 		}
 		return httputils.NewInternalServerError(err)
 	}
+
 	// Check password
 	if err := hashutils.MatchesPassword(user.Password, req.User.Password); err != nil {
 		logger.Errorw("UserHandler_handleSignIn failed to sign in with wrong password", "err", err)
@@ -71,6 +76,7 @@ func (h *Handler) handleCurrentUser(c echo.Context) error {
 		ctx    = c.Request().Context()
 		logger = logging.FromContext(ctx)
 	)
+
 	// Find current user
 	user, err := h.userDB.FindByID(ctx, authutils.CurrentUser(c))
 	if err != nil {
@@ -87,17 +93,20 @@ func (h *Handler) handleUpdateUser(c echo.Context) error {
 		logger = logging.FromContext(ctx)
 		req    = &UpdateUserRequest{}
 	)
+
 	// Find current user
 	user, err := h.userDB.FindByID(ctx, authutils.CurrentUser(c))
 	if err != nil {
 		logger.Errorw("UserHandler_handleUpdateUser failed to find an user", "err", err)
 		return httputils.NewInternalServerError(nil)
 	}
+
 	// Bind request
 	if err := req.Bind(c, user); err != nil {
 		logger.Errorw("UserHandler_handleUpdateUser failed to bind request", "err", err)
 		return httputils.WrapBindError(err)
 	}
+
 	// Update user
 	if err := h.userDB.Update(ctx, user); err != nil {
 		logger.Errorw("UserHandler_handleUpdateUser failed to update an user", "err", err)

@@ -12,7 +12,7 @@ type SignUpRequest struct {
 	User struct {
 		Username string `json:"username" validate:"required"`
 		Email    string `json:"email" validate:"required,email"`
-		Password string `json:"password"`
+		Password string `json:"password" validate:"required"`
 	} `json:"user" validate:"required"`
 }
 
@@ -42,6 +42,7 @@ func (r *SignInRequest) Bind(ctx echo.Context) error {
 	return httputils.BindAndValidate(ctx, r)
 }
 
+// UpdateUserRequest represents request body data of updating an user.
 type UpdateUserRequest struct {
 	User struct {
 		Username string `json:"username" validate:"omitempty"`

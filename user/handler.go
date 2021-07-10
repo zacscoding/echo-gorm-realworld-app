@@ -46,5 +46,5 @@ func (h *Handler) Route(e *echo.Group, authMiddleware echo.MiddlewareFunc) {
 	profileGroup.Use(authMiddleware)
 	profileGroup.GET("/:username", h.handleGetProfile)
 	profileGroup.POST("/:username/follow", h.handleFollow)
-	profileGroup.DELETE("/:username/follow", h.handleUnfollow)
+	profileGroup.DELETE("/:username/unfollow", h.handleUnfollow)
 }

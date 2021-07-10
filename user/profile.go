@@ -55,6 +55,9 @@ func (h *Handler) handleFollow(c echo.Context) error {
 	if err := h.userDB.Follow(ctx, currentUserID, user.ID); err != nil {
 		logger.Errorw("UserHandler_handleFollow", "failed to update follow relation", "userID", currentUserID,
 			"followID", user.ID, "err", err)
+		if err == database.ErrKeyConflict {
+			return httputils.NewStatusUnprocessableEntity(fmt.Sprintf("user already following %s", user.Name))
+		}
 		return httputils.NewInternalServerError(err)
 	}
 	user.Following = true
@@ -76,7 +79,7 @@ func (h *Handler) handleUnfollow(c echo.Context) error {
 	if err := h.userDB.UnFollow(ctx, currentUserID, user.ID); err != nil {
 		logger.Errorw("UserHandler_handleFollow failed to update unfollow relation", "userID", currentUserID, "followID", user.ID, "err", err)
 		if err == database.ErrRecordNotFound {
-			return httputils.NewNotFoundError(fmt.Sprintf("user already unfollowing user(%s)", username))
+			return httputils.NewStatusUnprocessableEntity(fmt.Sprintf("user already unfollowing user(%s)", username))
 		}
 		return httputils.NewInternalServerError(err)
 	}

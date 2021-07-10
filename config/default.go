@@ -14,5 +14,5 @@ var defaultConfig = map[string]interface{}{
 	"db.migrate.dir":      "",
 	"db.pool.maxOpen":     50,
 	"db.pool.maxIdle":     5,
-	"db.pool.maxLifetime": 5,
+	"db.pool.maxLifetime": "86400s",
 }
