@@ -1,0 +1,53 @@
+-- Temporary
+-- insert into users (user_id, email, name, password, bio, image, created_at, updated_at, deleted_at, disabled)
+-- values  (1, 'user1@gmail.com', 'user1', '$2a$10$GMBAZGlg/Mm8G2v1CJYzNeSvOFupsN8EZnpcJUBW1QFgrFZ8UqVhC', 'user1 bio', 'https://cdn.com/user1', '2020-12-31 05:02:00', '2020-12-31 05:02:00', null, 0),
+--         (2, 'user2@gmail.com', 'user2', '$2a$10$vsErzmd9sQWoyqYVw4gDDeh0Aab566eaeLXZd49SY1SQIaMs8p3/i', 'user2 bio', 'https://cdn.com/user2', '2020-01-31 05:02:00', '2020-01-31 05:02:00', null, 0),
+--         (3, 'user3@gmail.com', 'user3', '$2a$10$abP5Ft69yER6IjjxDwa0A.pqJjasKdJPnq3IVCp2ZhZ.RaRK.l9rK', 'user3 bio', 'https://cdn.com/user3', '2021-06-07 07:02:00', '2021-06-07 07:02:00', null, 0);
+--
+-- insert into articles (article_id, created_at, updated_at, deleted_at, slug, title, description, body, author_id)
+-- values  (1, '2020-01-01 05:00:00', '2020-01-01 05:00:00', null, 'user1article1', 'user1article1', 'user1article1_description', 'user1article1_body', 1),
+--         (2, '2020-01-02 05:00:00', '2020-01-02 05:00:00', null, 'user1article2', 'user1article2', 'user1article2_description', 'user1article2_body', 1),
+--         (3, '2020-01-03 05:00:00', '2020-01-03 05:00:00', null, 'user1article3', 'user1article3', 'user1article3_description', 'user1article3_body', 1),
+--         (4, '2020-01-04 05:00:00', '2020-01-04 05:00:00', null, 'user1article4', 'user1article4', 'user1article4_description', 'user1article4_body', 1),
+--         (5, '2020-01-05 05:00:00', '2020-01-05 05:00:00', null, 'user1article5', 'user1article5', 'user1article5_description', 'user1article5_body', 1),
+--         (6, '2020-01-06 05:00:00', '2020-01-06 05:00:00', null, 'user1article6', 'user1article6', 'user1article6_description', 'user1article5_body', 1),
+--         (7, '2020-01-07 05:00:00', '2020-01-07 05:00:00', null, 'user2article1', 'user2article1', 'user2article1_description', 'user2article1_body', 2),
+--         (8, '2020-01-08 05:00:00', '2020-01-08 05:00:00', null, 'user2article2', 'user2article2', 'user2article2_description', 'user2article2_body', 2),
+--         (9, '2020-01-09 05:00:00', '2020-01-09 05:00:00', null, 'user3article1', 'user3article1', 'user3article1_description', 'user3article1_body', 3);
+--
+-- insert into tags (tag_id, created_at, name)
+-- values  (1, '2021-07-29 12:09:45', 'tag1'),
+--         (2, '2021-07-29 12:09:45', 'tag2'),
+--         (3, '2021-07-29 12:09:45', 'tag3'),
+--         (4, '2021-07-29 12:09:45', 'tag4');
+--
+-- insert into article_tags (article_id, tag_id)
+-- values  (1, 1),
+--         (2, 1),
+--         (4, 1),
+--         (5, 1),
+--         (6, 1),
+--         (7, 1),
+--         (1, 2),
+--         (3, 2),
+--         (5, 2),
+--         (6, 2),
+--         (8, 2),
+--         (3, 3),
+--         (4, 3),
+--         (7, 3),
+--         (9, 3);
+--
+-- insert into article_favorites (user_id, article_id)
+-- values  (2, 1),
+--         (3, 1),
+--         (2, 2),
+--         (3, 3),
+--         (2, 4),
+--         (2, 6),
+--         (3, 6),
+--         (1, 7),
+--         (3, 7),
+--         (3, 8),
+--         (1, 9),
+--         (2, 9);

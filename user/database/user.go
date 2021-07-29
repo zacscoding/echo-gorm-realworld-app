@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"github.com/zacscoding/echo-gorm-realworld-app/config"
 	"github.com/zacscoding/echo-gorm-realworld-app/database"
 	"github.com/zacscoding/echo-gorm-realworld-app/logging"
 	"github.com/zacscoding/echo-gorm-realworld-app/user/model"
@@ -39,13 +40,19 @@ type UserDB interface {
 	// IsFollow returns a true if userID follows followerID, otherwise false.
 	IsFollow(ctx context.Context, userID, followerID uint) (bool, error)
 
+	// IsFollows returns follow ids which filterted from followerIDs array.
+	IsFollows(ctx context.Context, userID uint, followerIDs []uint) (map[uint]bool, error)
+
 	// UnFollow unfollows given userID to followerID.
 	// database.ErrRecordNotFound will be returned if user does not follow.
 	UnFollow(ctx context.Context, userID, followerID uint) error
+
+	// FindFollowerIDs returns follower ids from given user.
+	FindFollowerIDs(ctx context.Context, userID uint) ([]uint, error)
 }
 
 // NewUserDB creates a new UserDB with given gorm.DB
-func NewUserDB(db *gorm.DB) UserDB {
+func NewUserDB(_ *config.Config, db *gorm.DB) UserDB {
 	return &userDB{
 		db: db,
 	}
@@ -166,6 +173,29 @@ func (db *userDB) IsFollow(ctx context.Context, userID, followerID uint) (bool, 
 	return count == 1, nil
 }
 
+func (db *userDB) IsFollows(ctx context.Context, userID uint, followerIDs []uint) (map[uint]bool, error) {
+	logger := logging.FromContext(ctx)
+	logger.Debugw("UserDB_IsFollows try to check the following relations", "userID", userID, "followerIDs", followerIDs)
+
+	fm := make(map[uint]bool)
+	for _, id := range followerIDs {
+		fm[id] = false
+	}
+
+	var res []uint
+	if err := db.db.WithContext(ctx).Table(model.TableNameFollow).
+		Select("follow_id").
+		Where("user_id = ? AND follow_id IN (?)", userID, followerIDs).
+		Find(&res).Error; err != nil {
+		logger.Errorw("UserDB_IsFollows failed to find the following relations", "err", err)
+		return nil, database.WrapError(err)
+	}
+	for _, r := range res {
+		fm[r] = true
+	}
+	return fm, nil
+}
+
 func (db *userDB) UnFollow(ctx context.Context, userID, followerID uint) error {
 	logger := logging.FromContext(ctx)
 	logger.Debugw("UserDB_UnFollow try to delete the following relation", "userID", userID, "followerID", followerID)
@@ -180,4 +210,20 @@ func (db *userDB) UnFollow(ctx context.Context, userID, followerID uint) error {
 		return database.WrapError(gorm.ErrRecordNotFound)
 	}
 	return nil
+}
+
+func (db *userDB) FindFollowerIDs(ctx context.Context, userID uint) ([]uint, error) {
+	logger := logging.FromContext(ctx)
+	logger.Debugw("UserDB_FindFollowerIDs try to find follower ids", "userID", userID)
+
+	var followers []uint
+	if err := db.db.WithContext(ctx).
+		Table(model.TableNameFollow).
+		Select("follow_id").
+		Where("user_id = ?", userID).
+		Find(&followers).Error; err != nil {
+		logger.Errorw("UserDB_FindFollowerIDs failed to find follower ids", "userID", userID, "err", err)
+		return nil, database.WrapError(err)
+	}
+	return followers, nil
 }

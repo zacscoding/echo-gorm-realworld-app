@@ -23,7 +23,7 @@ func NewHandler(env *serverenv.ServerEnv, cfg *config.Config) (*Handler, error) 
 	}
 	return &Handler{
 		cfg:         cfg,
-		userDB:      env.GetUserDB(),
+		userDB:      userDB.NewUserDB(cfg, env.GetDB()),
 		jwtSecret:   []byte(cfg.JWTConfig.Secret),
 		jwtDuration: jwtDuration,
 	}, nil

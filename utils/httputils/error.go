@@ -15,12 +15,15 @@ type Error struct {
 // If possible to cast validator.ValidationErrors, then use first error elts with http.StatusUnprocessableEntity
 // otherwise return err's message with http.StatusInternalServerError
 func WrapBindError(err error) error {
-	verrs, ok := err.(validator.ValidationErrors)
-	if !ok || len(verrs) == 0 {
+	switch v := err.(type) {
+	case validator.ValidationErrors:
+		msg := fmt.Sprintf("%s validation error. reason: %s", v[0].Field(), v[0].Tag())
+		return NewError(http.StatusUnprocessableEntity, msg)
+	case *echo.HTTPError:
+		return v
+	default:
 		return NewError(http.StatusInternalServerError, err.Error())
 	}
-	msg := fmt.Sprintf("%s validation error. reason: %s", verrs[0].Field(), verrs[0].Tag())
-	return NewError(http.StatusUnprocessableEntity, msg)
 }
 
 // NewUnauthorized returns echo.HTTPError with 401 Unauthorized and given message.

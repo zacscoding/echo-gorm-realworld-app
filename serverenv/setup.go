@@ -22,7 +22,7 @@ func SetupWith(cfg *config.Config) (*ServerEnv, error) {
 	opts = append(opts, WithDB(db))
 
 	// Setup userDB
-	opts = append(opts, WithUserDB(userDB.NewUserDB(db)))
+	opts = append(opts, WithUserDB(userDB.NewUserDB(cfg, db)))
 
 	return NewServerEnv(opts...), nil
 }

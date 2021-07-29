@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"github.com/zacscoding/echo-gorm-realworld-app/article/model"
+	"github.com/zacscoding/echo-gorm-realworld-app/config"
 	"github.com/zacscoding/echo-gorm-realworld-app/database"
 	"github.com/zacscoding/echo-gorm-realworld-app/logging"
 	userModel "github.com/zacscoding/echo-gorm-realworld-app/user/model"
@@ -29,13 +30,14 @@ func TestQuerySuite(t *testing.T) {
 }
 
 func (s *QuerySuite) SetupSuite() {
+	cfg, _ := config.Load("")
 	logging.SetConfig(&logging.Config{
 		Encoding:    "console",
 		Level:       zapcore.FatalLevel,
 		Development: false,
 	})
 	s.originDB, s.dbTeardown = database.NewTestDatabase(s.T(), true)
-	s.db = NewArticleDB(s.originDB)
+	s.db = NewArticleDB(cfg, s.originDB)
 	sqlDB, err := s.originDB.DB()
 	s.NoError(err)
 
@@ -60,7 +62,7 @@ func (s *QuerySuite) SetupSuite() {
 }
 
 func (s *QuerySuite) TearDownSuite() {
-	s.dbTeardown()
+	//s.dbTeardown()
 }
 
 func (s *QuerySuite) TestFindBySlug() {

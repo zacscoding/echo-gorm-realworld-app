@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"github.com/zacscoding/echo-gorm-realworld-app/article/model"
+	"github.com/zacscoding/echo-gorm-realworld-app/config"
 	"github.com/zacscoding/echo-gorm-realworld-app/database"
 	"github.com/zacscoding/echo-gorm-realworld-app/logging"
 	userModel "github.com/zacscoding/echo-gorm-realworld-app/user/model"
@@ -59,7 +60,7 @@ type CommentDB interface {
 }
 
 // NewArticleDB creates a new ArticleDB with given gorm.DB
-func NewArticleDB(db *gorm.DB) ArticleDB {
+func NewArticleDB(_ *config.Config, db *gorm.DB) ArticleDB {
 	return &articleDB{
 		db: db,
 	}

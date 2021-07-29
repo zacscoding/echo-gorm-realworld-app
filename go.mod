@@ -12,6 +12,7 @@ require (
 	github.com/golang-migrate/migrate v3.5.4+incompatible
 	github.com/google/go-cmp v0.5.6 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
+	github.com/gosimple/slug v1.10.0
 	github.com/jeremywohl/flatten v1.0.1
 	github.com/jinzhu/copier v0.3.2
 	github.com/knadh/koanf v1.1.0

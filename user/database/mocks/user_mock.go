@@ -84,6 +84,29 @@ func (_m *UserDB) FindByName(ctx context.Context, username string) (*model.User,
 	return r0, r1
 }
 
+// FindFollowerIDs provides a mock function with given fields: ctx, userID
+func (_m *UserDB) FindFollowerIDs(ctx context.Context, userID uint) ([]uint, error) {
+	ret := _m.Called(ctx, userID)
+
+	var r0 []uint
+	if rf, ok := ret.Get(0).(func(context.Context, uint) []uint); ok {
+		r0 = rf(ctx, userID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]uint)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, uint) error); ok {
+		r1 = rf(ctx, userID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // Follow provides a mock function with given fields: ctx, userID, followerID
 func (_m *UserDB) Follow(ctx context.Context, userID uint, followerID uint) error {
 	ret := _m.Called(ctx, userID, followerID)
@@ -112,6 +135,29 @@ func (_m *UserDB) IsFollow(ctx context.Context, userID uint, followerID uint) (b
 	var r1 error
 	if rf, ok := ret.Get(1).(func(context.Context, uint, uint) error); ok {
 		r1 = rf(ctx, userID, followerID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// IsFollows provides a mock function with given fields: ctx, userID, followerIDs
+func (_m *UserDB) IsFollows(ctx context.Context, userID uint, followerIDs []uint) (map[uint]bool, error) {
+	ret := _m.Called(ctx, userID, followerIDs)
+
+	var r0 map[uint]bool
+	if rf, ok := ret.Get(0).(func(context.Context, uint, []uint) map[uint]bool); ok {
+		r0 = rf(ctx, userID, followerIDs)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(map[uint]bool)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, uint, []uint) error); ok {
+		r1 = rf(ctx, userID, followerIDs)
 	} else {
 		r1 = ret.Error(1)
 	}

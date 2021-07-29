@@ -10,7 +10,7 @@ db:
   #dataSourceName: root:password@tcp(db)/local_db?charset=utf8&parseTime=True&multiStatements=true
   dataSourceName: root:password@(localhost:43306)/local_db?charset=utf8&parseTime=True&multiStatements=true
   migrate:
-    enable: true
+    enable: false
     dir: migrations/
   pool:
     maxOpen: 50

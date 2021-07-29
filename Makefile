@@ -3,10 +3,26 @@
 cleantests:
 	@go clean -testcache
 
+tests: test.clean test test.datarace test.build lint
+
 test:
-	@go test ./...
+	@echo "Run tests"
+	@go test ./... -timeout 5m
+
+test.clean:
+	@echo "Clean test cache"
+	@go clean -testcache
+
+test.datarace:
+	@echo "Run tests with datarace"
+	@go test ./... -race -timeout 5m
+
+test.build:
+	@echo "Run test build"
+	@go build -o /dev/null
 
 lint:
+	@echo "Run check lint"
 	@gofmt -d .
 
 generate:

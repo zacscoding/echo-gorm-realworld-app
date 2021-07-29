@@ -50,7 +50,7 @@ func (adb *articleDB) FindArticlesByQuery(ctx context.Context, user *userModel.U
 		logger = logging.FromContext(ctx)
 		userID = uint(0)
 	)
-	if user != nil {
+	if user != nil && user.ID != 0 {
 		userID = user.ID
 	}
 	logger.Debugw("ArticleDB_FindArticlesByQuery try to find recent articles", "userID", userID, "query", query, "offset", offset, "limit", limit)

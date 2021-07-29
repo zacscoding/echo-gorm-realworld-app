@@ -1,6 +1,7 @@
 package model
 
 import (
+	"github.com/gosimple/slug"
 	userModel "github.com/zacscoding/echo-gorm-realworld-app/user/model"
 	"gorm.io/gorm"
 	"time"
@@ -13,6 +14,8 @@ const (
 	TableNameArticleTag      = "article_tags"
 	TableNameComment         = "comments"
 )
+
+var EmptyArticles = &Articles{Articles: make([]*Article, 0), ArticlesCount: 0}
 
 // Articles represents article list with total size.
 type Articles struct {
@@ -43,6 +46,16 @@ type Article struct {
 
 func (a *Article) TableName() string {
 	return TableNameArticle
+}
+
+func (a *Article) BeforeCreate(_ *gorm.DB) error {
+	a.Slug = slug.Make(a.Title)
+	return nil
+}
+
+func (a *Article) BeforeUpdate(_ *gorm.DB) error {
+	a.Slug = slug.Make(a.Title)
+	return nil
 }
 
 // ArticleFavorite represents relation articles and favoraties.

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/zacscoding/echo-gorm-realworld-app/article"
 	"github.com/zacscoding/echo-gorm-realworld-app/config"
 	"github.com/zacscoding/echo-gorm-realworld-app/logging"
 	"github.com/zacscoding/echo-gorm-realworld-app/serverenv"
@@ -41,6 +42,8 @@ func main() {
 	authMiddleware := authutils.NewJWTMiddleware(
 		map[string]struct{}{
 			"/api/profile/:username": {},
+			"/api/articles":          {},
+			"/api/articles/:slug":    {},
 		},
 		cfg.JWTConfig.Secret,
 	)
@@ -49,6 +52,12 @@ func main() {
 		logging.DefaultLogger().Fatalw("failed to initialize user handler", "err", err)
 	}
 	userHandler.Route(v1, authMiddleware)
+
+	articleHandler, err := article.NewHandler(serverEnv, cfg)
+	if err != nil {
+		logging.DefaultLogger().Fatalw("failed to initialize article handler", "err", err)
+	}
+	articleHandler.Route(v1, authMiddleware)
 
 	if e.Start(fmt.Sprintf(":%d", cfg.ServerConfig.Port)); err != nil {
 		logging.DefaultLogger().Fatalw("shutting down server", "err", err)

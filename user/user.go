@@ -38,7 +38,7 @@ func (h *Handler) handleSignUp(c echo.Context) error {
 	return h.responseUser(c, &user)
 }
 
-// handleSignIn handles "POST /api/users/login" to sign in an user.
+// handleSignIn handles "POST /api/users/login" to sign in a user.
 func (h *Handler) handleSignIn(c echo.Context) error {
 	var (
 		ctx    = c.Request().Context()
@@ -55,7 +55,6 @@ func (h *Handler) handleSignIn(c echo.Context) error {
 	// Find an user from given email
 	user, err := h.userDB.FindByEmail(ctx, req.User.Email)
 	if err != nil {
-		logger.Errorw("UserHandler_handleSignIn failed to find an user", "err", err)
 		if err == database.ErrRecordNotFound {
 			return httputils.NewNotFoundError(fmt.Sprintf("user(%s) not found", req.User.Email))
 		}
@@ -73,14 +72,12 @@ func (h *Handler) handleSignIn(c echo.Context) error {
 // handleCurrentUser handles "GET /api/user" to get current user.
 func (h *Handler) handleCurrentUser(c echo.Context) error {
 	var (
-		ctx    = c.Request().Context()
-		logger = logging.FromContext(ctx)
+		ctx = c.Request().Context()
 	)
 
 	// Find current user
 	user, err := h.userDB.FindByID(ctx, authutils.CurrentUser(c))
 	if err != nil {
-		logger.Errorw("UserHandler_handleUpdateUser failed to find an user", "err", err)
 		return httputils.NewInternalServerError(err)
 	}
 	return h.responseUser(c, user)
@@ -97,7 +94,6 @@ func (h *Handler) handleUpdateUser(c echo.Context) error {
 	// Find current user
 	user, err := h.userDB.FindByID(ctx, authutils.CurrentUser(c))
 	if err != nil {
-		logger.Errorw("UserHandler_handleUpdateUser failed to find an user", "err", err)
 		return httputils.NewInternalServerError(nil)
 	}
 
@@ -109,7 +105,6 @@ func (h *Handler) handleUpdateUser(c echo.Context) error {
 
 	// Update user
 	if err := h.userDB.Update(ctx, user); err != nil {
-		logger.Errorw("UserHandler_handleUpdateUser failed to update an user", "err", err)
 		return httputils.NewInternalServerError(err)
 	}
 	return h.responseUser(c, user)

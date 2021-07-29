@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
+	"github.com/zacscoding/echo-gorm-realworld-app/config"
 	"github.com/zacscoding/echo-gorm-realworld-app/database"
 	"github.com/zacscoding/echo-gorm-realworld-app/logging"
 	"github.com/zacscoding/echo-gorm-realworld-app/user/model"
@@ -19,6 +20,9 @@ import (
 var (
 	defaultUser  = newTestUser("default@gmail.com", false)
 	defaultUser2 = newTestUser("default2@gmail.com", false)
+	defaultUser3 = newTestUser("default3@gmail.com", false)
+	defaultUser4 = newTestUser("default4@gmail.com", false)
+	defaultUser5 = newTestUser("default5@gmail.com", false)
 	disabledUser = newTestUser("disable@gmail.com", true)
 )
 
@@ -34,13 +38,14 @@ func TestSuite(t *testing.T) {
 }
 
 func (s *Suite) SetupSuite() {
+	cfg, _ := config.Load("")
 	logging.SetConfig(&logging.Config{
 		Encoding:    "console",
 		Level:       zapcore.FatalLevel,
 		Development: false,
 	})
 	s.originDB, s.dbTeardown = database.NewTestDatabase(s.T(), true)
-	s.db = NewUserDB(s.originDB)
+	s.db = NewUserDB(cfg, s.originDB)
 }
 
 func (s *Suite) TearDownSuite() {
@@ -54,7 +59,7 @@ func (s *Suite) SetupTest() {
 	})
 	s.NoError(err)
 
-	users := []*model.User{defaultUser, defaultUser2, disabledUser}
+	users := []*model.User{defaultUser, defaultUser2, defaultUser3, defaultUser4, defaultUser5, disabledUser}
 	s.NoError(s.originDB.Create(users).Error)
 }
 
@@ -311,6 +316,26 @@ func (s *Suite) TestIsFollow() {
 	s.False(following)
 }
 
+func (s *Suite) TestIsFollows() {
+	u1, u2, u3, u4, u5 := defaultUser, defaultUser2, defaultUser3, defaultUser4, defaultUser5
+	// u1 follows u2, u4, u5
+	s.NoError(s.db.Follow(context.TODO(), u1.ID, u2.ID))
+	s.NoError(s.db.Follow(context.TODO(), u1.ID, u4.ID))
+	s.NoError(s.db.Follow(context.TODO(), u1.ID, u5.ID))
+	s.NoError(s.db.Follow(context.TODO(), u2.ID, u5.ID))
+	s.NoError(s.db.Follow(context.TODO(), u2.ID, u1.ID))
+
+	m, err := s.db.IsFollows(context.TODO(), u1.ID, []uint{
+		u2.ID, u3.ID, u4.ID,
+	})
+
+	s.NoError(err)
+	s.Len(m, 3)
+	s.True(m[u2.ID])
+	s.False(m[u3.ID])
+	s.True(m[u4.ID])
+}
+
 func (s *Suite) TestUnFollow() {
 	u1, u2 := defaultUser, defaultUser2
 	err := s.db.Follow(context.TODO(), u1.ID, u2.ID)
@@ -321,6 +346,30 @@ func (s *Suite) TestUnFollow() {
 
 	err = s.db.UnFollow(context.TODO(), u1.ID, u2.ID)
 	fmt.Println(err)
+}
+
+func (s *Suite) TestFindFollowerIDs() {
+	u1, u2, u3, u4, u5 := defaultUser, defaultUser2, defaultUser3, defaultUser4, defaultUser5
+	// u1 follows u2, u4, u5
+	s.NoError(s.db.Follow(context.TODO(), u1.ID, u2.ID))
+	s.NoError(s.db.Follow(context.TODO(), u1.ID, u4.ID))
+	s.NoError(s.db.Follow(context.TODO(), u1.ID, u5.ID))
+	s.NoError(s.db.Follow(context.TODO(), u2.ID, u5.ID))
+	s.NoError(s.db.Follow(context.TODO(), u2.ID, u1.ID))
+	s.NoError(s.db.Follow(context.TODO(), u3.ID, u1.ID))
+
+	followers, err := s.db.FindFollowerIDs(context.TODO(), u1.ID)
+
+	assert.NoError(s.T(), err)
+	assert.Len(s.T(), followers, 3)
+	assert.Contains(s.T(), followers, u2.ID)
+	assert.Contains(s.T(), followers, u4.ID)
+	assert.Contains(s.T(), followers, u5.ID)
+
+	followers, err = s.db.FindFollowerIDs(context.TODO(), u5.ID)
+
+	assert.NoError(s.T(), err)
+	assert.Empty(s.T(), followers)
 }
 
 func newTestUser(email string, disabled bool) *model.User {

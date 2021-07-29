@@ -2,9 +2,11 @@ package database
 
 import (
 	"context"
+	"github.com/gosimple/slug"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"github.com/zacscoding/echo-gorm-realworld-app/article/model"
+	"github.com/zacscoding/echo-gorm-realworld-app/config"
 	"github.com/zacscoding/echo-gorm-realworld-app/database"
 	"github.com/zacscoding/echo-gorm-realworld-app/logging"
 	userModel "github.com/zacscoding/echo-gorm-realworld-app/user/model"
@@ -27,13 +29,14 @@ func TestSuite(t *testing.T) {
 }
 
 func (s *Suite) SetupSuite() {
+	cfg, _ := config.Load("")
 	logging.SetConfig(&logging.Config{
 		Encoding:    "console",
 		Level:       zapcore.FatalLevel,
 		Development: false,
 	})
 	s.originDB, s.dbTeardown = database.NewTestDatabase(s.T(), true)
-	s.db = NewArticleDB(s.originDB)
+	s.db = NewArticleDB(cfg, s.originDB)
 }
 
 func (s *Suite) TearDownSuite() {
@@ -71,6 +74,7 @@ func (s *Suite) TestSave() {
 	find, err := s.db.FindBySlug(context.TODO(), nil, a.Slug)
 	s.NoError(err)
 	s.Equal(a.Slug, find.Slug)
+	s.Equal(slug.Make(a.Title), find.Slug)
 	s.Equal(a.Title, find.Title)
 	s.Equal(a.Description, find.Description)
 	s.Equal(a.Body, find.Body)
@@ -114,7 +118,6 @@ func (s *Suite) TestUpdate() {
 
 	update := &model.Article{
 		ID:          exist.ID,
-		Slug:        "newslug",
 		Title:       "newslug",
 		Description: "updated description",
 		Body:        "updated body",
@@ -129,6 +132,7 @@ func (s *Suite) TestUpdate() {
 	var find model.Article
 	s.NoError(s.originDB.First(&find, "article_id = ?", update.ID).Error)
 	s.Equal(update.Slug, find.Slug)
+	s.Equal(slug.Make(update.Slug), find.Slug)
 	s.Equal(update.Title, find.Title)
 	s.Equal(update.Description, find.Description)
 	s.Equal(update.Body, find.Body)
@@ -151,16 +155,16 @@ func (s *Suite) TestUpdateFail() {
 			name: "duplicate slug",
 			user: s.u1,
 			update: &model.Article{
-				ID:   articles[0].ID,
-				Slug: articles[1].Slug,
+				ID:    articles[0].ID,
+				Title: articles[1].Title,
 			},
 			msg: database.ErrKeyConflict.Error(),
 		}, {
 			name: "not found by author",
 			user: s.u2,
 			update: &model.Article{
-				ID:   articles[0].ID,
-				Slug: articles[0].Slug,
+				ID:    articles[0].ID,
+				Title: articles[0].Title,
 			},
 			msg: database.ErrRecordNotFound.Error(),
 		}, {
@@ -237,7 +241,6 @@ func newArticle(title, description, body string, author userModel.User, tagValue
 	}
 
 	return &model.Article{
-		Slug:        title,
 		Title:       title,
 		Description: description,
 		Body:        body,
