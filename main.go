@@ -41,9 +41,10 @@ func main() {
 	v1 := e.Group("/api")
 	authMiddleware := authutils.NewJWTMiddleware(
 		map[string]struct{}{
-			"/api/profile/:username": {},
-			"/api/articles":          {},
-			"/api/articles/:slug":    {},
+			"/api/profile/:username":       {},
+			"/api/articles":                {},
+			"/api/articles/:slug":          {},
+			"/api/articles/:slug/comments": {},
 		},
 		cfg.JWTConfig.Secret,
 	)

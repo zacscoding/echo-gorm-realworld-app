@@ -178,7 +178,7 @@ func (h *Handler) handleDeleteArticle(c echo.Context) error {
 		}
 		return httputils.NewInternalServerError(err)
 	}
-	return c.String(http.StatusOK, "")
+	return c.JSON(http.StatusOK, types.ToStatusResponse(types.StatusDeleted, nil))
 }
 
 // getArticleBySlug returns an article if exists, otherwise wrapped http error
@@ -194,6 +194,9 @@ func (h *Handler) getArticleBySlug(ctx context.Context, currentUser *userModel.U
 }
 
 func (h *Handler) checkFollowAuthorsArticles(ctx context.Context, u *userModel.User, articles ...*articlemodel.Article) error {
+	if len(articles) == 0 {
+		return nil
+	}
 	var authors []uint
 	for _, a := range articles {
 		authors = append(authors, a.AuthorID)

@@ -56,7 +56,7 @@ type CommentDB interface {
 
 	// DeleteCommentByID deletes a comment matched by user'id and comment id.
 	// database.ErrRecordNotFound will be returned if zero row affected.
-	DeleteCommentByID(ctx context.Context, user *userModel.User, commentID uint) error
+	DeleteCommentByID(ctx context.Context, user *userModel.User, articleID, commentID uint) error
 }
 
 // NewArticleDB creates a new ArticleDB with given gorm.DB

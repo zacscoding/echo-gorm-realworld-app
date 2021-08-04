@@ -7,6 +7,10 @@ import (
 	"github.com/zacscoding/echo-gorm-realworld-app/utils/httputils"
 )
 
+//----------------------------------------------
+// Common requests
+//----------------------------------------------
+
 type PageableQuery struct {
 	Limit  int `query:"limit"`
 	Offset int `query:"offset"`
@@ -35,6 +39,10 @@ func (r *PageableQuery) Validate() error {
 	return nil
 }
 
+//----------------------------------------------
+// Article requests
+//----------------------------------------------
+
 type ArticleQuery struct {
 	*PageableQuery
 	Tag       string `query:"tag"`
@@ -59,7 +67,7 @@ type CreateArticleRequest struct {
 		Description string   `json:"description" validate:"required"`
 		Body        string   `json:"body" validate:"required"`
 		Tags        []string `json:"tagList"`
-	} `json:"article"`
+	} `json:"article" validate:"required"`
 }
 
 func (r *CreateArticleRequest) Bind(ctx echo.Context, a *articlemodel.Article, u *userModel.User) error {
@@ -84,7 +92,7 @@ type UpdateArticleRequest struct {
 		Title       string `json:"title"`
 		Description string `json:"description"`
 		Body        string `json:"body"`
-	} `json:"article"`
+	} `json:"article" validate:"required"`
 }
 
 func (r *UpdateArticleRequest) Bind(ctx echo.Context, a *articlemodel.Article, u *userModel.User) error {
@@ -100,5 +108,27 @@ func (r *UpdateArticleRequest) Bind(ctx echo.Context, a *articlemodel.Article, u
 	if r.Article.Body != "" {
 		a.Body = r.Article.Body
 	}
+	return nil
+}
+
+//----------------------------------------------
+// Comment requests
+//----------------------------------------------
+
+// CreateCommentRequest represents request body data of creating a comment.
+type CreateCommentRequest struct {
+	Comment struct {
+		Body string `json:"body" validate:"required"`
+	} `json:"comment" validate:"required"`
+}
+
+func (r *CreateCommentRequest) Bind(ctx echo.Context, a *articlemodel.Article, c *articlemodel.Comment, u *userModel.User) error {
+	if err := httputils.BindAndValidate(ctx, r); err != nil {
+		return err
+	}
+	c.ArticleID = a.ID
+	c.Body = r.Comment.Body
+	c.AuthorID = u.ID
+	c.Author = *u
 	return nil
 }

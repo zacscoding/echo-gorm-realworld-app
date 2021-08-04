@@ -31,13 +31,13 @@ func (_m *ArticleDB) DeleteBySlug(ctx context.Context, user *model.User, slug st
 	return r0
 }
 
-// DeleteCommentByID provides a mock function with given fields: ctx, user, commentID
-func (_m *ArticleDB) DeleteCommentByID(ctx context.Context, user *model.User, commentID uint) error {
-	ret := _m.Called(ctx, user, commentID)
+// DeleteCommentByID provides a mock function with given fields: ctx, user, articleID, commentID
+func (_m *ArticleDB) DeleteCommentByID(ctx context.Context, user *model.User, articleID uint, commentID uint) error {
+	ret := _m.Called(ctx, user, articleID, commentID)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, *model.User, uint) error); ok {
-		r0 = rf(ctx, user, commentID)
+	if rf, ok := ret.Get(0).(func(context.Context, *model.User, uint, uint) error); ok {
+		r0 = rf(ctx, user, articleID, commentID)
 	} else {
 		r0 = ret.Error(0)
 	}

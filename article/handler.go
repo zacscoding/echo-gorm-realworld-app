@@ -33,4 +33,11 @@ func (h *Handler) Route(e *echo.Group, authMiddleware echo.MiddlewareFunc) {
 	articleGroup.POST("", h.handleCreateArticle)
 	articleGroup.PUT("/:slug", h.handleUpdateArticle)
 	articleGroup.DELETE("/:slug", h.handleDeleteArticle)
+
+	///api/articles/:slug/comments
+	commentGroup := e.Group("/articles/:slug/comments")
+	commentGroup.Use(authMiddleware)
+	commentGroup.GET("", h.handleGetComments)
+	commentGroup.POST("", h.handleCreateComment)
+	commentGroup.DELETE("/:id", h.handleDeleteComment)
 }

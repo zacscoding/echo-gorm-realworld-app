@@ -43,7 +43,7 @@ func (adb *articleDB) FindCommentsByArticleID(ctx context.Context, articleID uin
 	return comments, nil
 }
 
-func (adb *articleDB) DeleteCommentByID(ctx context.Context, user *userModel.User, commentID uint) error {
+func (adb *articleDB) DeleteCommentByID(ctx context.Context, user *userModel.User, articleID, commentID uint) error {
 	logger := logging.FromContext(ctx)
 	if user == nil {
 		logger.Error("CommentDB_DeleteCommentByID no user provided")
@@ -51,7 +51,9 @@ func (adb *articleDB) DeleteCommentByID(ctx context.Context, user *userModel.Use
 	}
 	logger.Debugw("CommentDB_DeleteCommentByID try to delete a comment", "userID", user.ID, "commentID", commentID)
 
-	result := adb.db.WithContext(ctx).Where("comment_id = ? AND author_id = ?", commentID, user.ID).Delete(&model.Comment{})
+	result := adb.db.WithContext(ctx).
+		Where("comment_id = ? AND author_id = ? AND article_id = ?", commentID, user.ID, articleID).
+		Delete(&model.Comment{})
 	if result.Error != nil {
 		logger.Errorw("CommentDB_DeleteCommentByID failed to delete", "err", result.Error)
 		return database.WrapError(result.Error)
