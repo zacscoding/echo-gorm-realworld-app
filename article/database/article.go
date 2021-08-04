@@ -29,6 +29,17 @@ type ArticleDB interface {
 	// DeleteBySlug deletes an article matched by user's id and slug.
 	// database.ErrRecordNotFound will be returned if zero row affected.
 	DeleteBySlug(ctx context.Context, user *userModel.User, slug string) error
+
+	// FavoriteArticle updates the relation of article and favorites.
+	// database.ErrKeyConflict will be returned if article not exists or already favorited.
+	FavoriteArticle(ctx context.Context, user *userModel.User, articleID uint) error
+
+	// UnFavoriteArticle deletes the relation of article and favorite.
+	// database.ErrRecordNotFound will be returned if zero row affected.
+	UnFavoriteArticle(ctx context.Context, user *userModel.User, articleID uint) error
+
+	// FindTags returns tags all
+	FindTags(ctx context.Context) ([]*model.Tag, error)
 }
 
 type ArticleQueryDB interface {
@@ -133,4 +144,56 @@ func (adb *articleDB) DeleteBySlug(ctx context.Context, user *userModel.User, sl
 		return database.WrapError(gorm.ErrRecordNotFound)
 	}
 	return nil
+}
+
+func (adb *articleDB) FavoriteArticle(ctx context.Context, user *userModel.User, articleID uint) error {
+	logger := logging.FromContext(ctx)
+	if user == nil {
+		logger.Error("ArticleDB_FavoriteArticle no user")
+		return database.WrapError(gorm.ErrRecordNotFound)
+	}
+	logger.Debugw("ArticleDB_FavoriteArticle try to favorite an article", "userID", user.ID, "articleID", articleID)
+
+	af := model.ArticleFavorite{
+		UserID:    user.ID,
+		ArticleID: articleID,
+	}
+	if err := adb.db.WithContext(ctx).Create(&af).Error; err != nil {
+		logger.Errorw("ArticleDB_FavoriteArticle failed to favorite an article", "userID", user.ID, "articleID", articleID, "err", err)
+		return database.WrapError(err)
+	}
+	return nil
+}
+
+func (adb *articleDB) UnFavoriteArticle(ctx context.Context, user *userModel.User, articleID uint) error {
+	logger := logging.FromContext(ctx)
+	if user == nil {
+		logger.Error("ArticleDB_UnFavoriteArticle no user")
+		return database.WrapError(gorm.ErrRecordNotFound)
+	}
+	logger = logger.With("userID", user.ID, "articleID", articleID)
+	logger.Debug("ArticleDB_UnFavoriteArticle try to unfavorite an article")
+
+	result := adb.db.WithContext(ctx).Where("article_id = ? AND author_id = ?", articleID, user.ID).Delete(new(model.ArticleFavorite))
+	if result.Error != nil {
+		logger.Errorw("ArticleDB_UnFavoriteArticle failed to unfavorite", "err", result.Error)
+		return database.WrapError(result.Error)
+	}
+	if result.RowsAffected != 1 {
+		logger.Error("ArticleDB_UnFavoriteArticle failed to unfavorite the article. zero rows affected")
+		return database.WrapError(gorm.ErrRecordNotFound)
+	}
+	return nil
+}
+
+func (adb *articleDB) FindTags(ctx context.Context) ([]*model.Tag, error) {
+	logger := logging.FromContext(ctx)
+	logger.Debug("ArticleDB_FindTags try to find tags all")
+
+	var tags []*model.Tag
+	if err := adb.db.WithContext(ctx).Find(&tags).Error; err != nil {
+		logger.Errorw("ArticleDB_FindTags failed to find tags all", "err", err)
+		return nil, database.WrapError(err)
+	}
+	return tags, nil
 }

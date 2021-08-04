@@ -181,6 +181,60 @@ func (h *Handler) handleDeleteArticle(c echo.Context) error {
 	return c.JSON(http.StatusOK, types.ToStatusResponse(types.StatusDeleted, nil))
 }
 
+// handleFavorite handles "POST /api/articles/:slug/favorite" to update favorite status.
+func (h *Handler) handleFavorite(c echo.Context) error {
+	slug := c.Param("slug")
+	return h.favoriteOrUnFavoriteArticle(c, slug, true)
+}
+
+// handleUnFavorite handles "DELETE /api/articles/:slug/favorite" to remove favorite status.
+func (h *Handler) handleUnFavorite(c echo.Context) error {
+	slug := c.Param("slug")
+	return h.favoriteOrUnFavoriteArticle(c, slug, false)
+}
+
+// handleGetTags handles "GET /api/tags" to get tags all
+func (h *Handler) handleGetTags(c echo.Context) error {
+	ctx := c.Request().Context()
+
+	// Query tags
+	tags, err := h.articleDB.FindTags(ctx)
+	if err != nil {
+		return httputils.NewInternalServerError(err)
+	}
+	return c.JSON(http.StatusOK, types.ToTagsResponse(tags))
+}
+
+func (h *Handler) favoriteOrUnFavoriteArticle(c echo.Context, slug string, isFavorite bool) error {
+	var (
+		ctx         = c.Request().Context()
+		currentUser = h.currentUser(c)
+	)
+
+	// Query article
+	article, err := h.getArticleBySlug(ctx, currentUser, slug)
+	if err != nil {
+		return err
+	}
+
+	// Update favorite or unfavorite
+	if isFavorite {
+		err = h.articleDB.FavoriteArticle(ctx, currentUser, article.ID)
+	} else {
+		err = h.articleDB.UnFavoriteArticle(ctx, currentUser, article.ID)
+	}
+	if err != nil {
+		return httputils.NewInternalServerError(err)
+	}
+
+	// Query article again
+	article, err = h.getArticleBySlug(ctx, currentUser, slug)
+	if err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, types.ToArticleResponse(article))
+}
+
 // getArticleBySlug returns an article if exists, otherwise wrapped http error
 func (h *Handler) getArticleBySlug(ctx context.Context, currentUser *userModel.User, slug string) (*articlemodel.Article, error) {
 	article, err := h.articleDB.FindBySlug(ctx, currentUser, slug)

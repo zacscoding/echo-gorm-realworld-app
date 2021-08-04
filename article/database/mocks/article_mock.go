@@ -45,6 +45,20 @@ func (_m *ArticleDB) DeleteCommentByID(ctx context.Context, user *model.User, ar
 	return r0
 }
 
+// FavoriteArticle provides a mock function with given fields: ctx, user, articleID
+func (_m *ArticleDB) FavoriteArticle(ctx context.Context, user *model.User, articleID uint) error {
+	ret := _m.Called(ctx, user, articleID)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, *model.User, uint) error); ok {
+		r0 = rf(ctx, user, articleID)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // FindArticlesByAuthors provides a mock function with given fields: ctx, user, authors, offset, limit
 func (_m *ArticleDB) FindArticlesByAuthors(ctx context.Context, user *model.User, authors []uint, offset int, limit int) (*articlemodel.Articles, error) {
 	ret := _m.Called(ctx, user, authors, offset, limit)
@@ -137,6 +151,29 @@ func (_m *ArticleDB) FindCommentsByArticleID(ctx context.Context, articleID uint
 	return r0, r1
 }
 
+// FindTags provides a mock function with given fields: ctx
+func (_m *ArticleDB) FindTags(ctx context.Context) ([]*articlemodel.Tag, error) {
+	ret := _m.Called(ctx)
+
+	var r0 []*articlemodel.Tag
+	if rf, ok := ret.Get(0).(func(context.Context) []*articlemodel.Tag); ok {
+		r0 = rf(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*articlemodel.Tag)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // Save provides a mock function with given fields: ctx, a
 func (_m *ArticleDB) Save(ctx context.Context, a *articlemodel.Article) error {
 	ret := _m.Called(ctx, a)
@@ -158,6 +195,20 @@ func (_m *ArticleDB) SaveComment(ctx context.Context, c *articlemodel.Comment) e
 	var r0 error
 	if rf, ok := ret.Get(0).(func(context.Context, *articlemodel.Comment) error); ok {
 		r0 = rf(ctx, c)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// UnFavoriteArticle provides a mock function with given fields: ctx, user, articleID
+func (_m *ArticleDB) UnFavoriteArticle(ctx context.Context, user *model.User, articleID uint) error {
+	ret := _m.Called(ctx, user, articleID)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, *model.User, uint) error); ok {
+		r0 = rf(ctx, user, articleID)
 	} else {
 		r0 = ret.Error(0)
 	}

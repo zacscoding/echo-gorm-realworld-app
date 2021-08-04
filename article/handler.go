@@ -25,6 +25,7 @@ func NewHandler(env *serverenv.ServerEnv, cfg *config.Config) (*Handler, error) 
 
 // Route configures route given "/api" echo.Group to "/api/users/**, /api/profile/**" paths.
 func (h *Handler) Route(e *echo.Group, authMiddleware echo.MiddlewareFunc) {
+	// articles
 	articleGroup := e.Group("/articles")
 	articleGroup.Use(authMiddleware)
 	articleGroup.GET("", h.handleGetArticles)
@@ -33,11 +34,16 @@ func (h *Handler) Route(e *echo.Group, authMiddleware echo.MiddlewareFunc) {
 	articleGroup.POST("", h.handleCreateArticle)
 	articleGroup.PUT("/:slug", h.handleUpdateArticle)
 	articleGroup.DELETE("/:slug", h.handleDeleteArticle)
+	articleGroup.POST("/:slug/favorite", h.handleFavorite)
+	articleGroup.DELETE("/:slug/favorite", h.handleUnFavorite)
 
-	///api/articles/:slug/comments
+	// comments
 	commentGroup := e.Group("/articles/:slug/comments")
 	commentGroup.Use(authMiddleware)
 	commentGroup.GET("", h.handleGetComments)
 	commentGroup.POST("", h.handleCreateComment)
 	commentGroup.DELETE("/:id", h.handleDeleteComment)
+
+	// tags
+	e.GET("/tags", h.handleGetTags)
 }

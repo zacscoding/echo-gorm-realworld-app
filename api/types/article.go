@@ -35,6 +35,16 @@ func ToArticlesResponse(as *articlemodel.Articles) *ArticlesResponse {
 	return res
 }
 
+// TagsResponse represents tags response.
+type TagsResponse struct {
+	Tags []string `json:"tags"`
+}
+
+// ToTagsResponse converts given tags model to TagsResponse.
+func ToTagsResponse(tags []*articlemodel.Tag) *TagsResponse {
+	return &TagsResponse{Tags: toTags(tags)}
+}
+
 type Article struct {
 	Slug           string    `json:"slug"`
 	Title          string    `json:"title"`
@@ -65,20 +75,24 @@ func toAuthor(u *userModel.User) Author {
 }
 
 func toArticle(a *articlemodel.Article) *Article {
-	tags := make([]string, len(a.Tags))
-	for i := 0; i < len(a.Tags); i++ {
-		tags[i] = a.Tags[i].Name
-	}
 	return &Article{
 		Slug:           a.Slug,
 		Title:          a.Title,
 		Description:    a.Description,
 		Body:           a.Body,
-		Tags:           tags,
+		Tags:           toTags(a.Tags),
 		CreatedAt:      a.CreatedAt,
 		UpdatedAt:      a.UpdatedAt,
 		Favorited:      a.Favorited,
 		FavoritesCount: a.FavoritesCount,
 		Author:         toAuthor(&a.Author),
 	}
+}
+
+func toTags(tags []*articlemodel.Tag) []string {
+	res := make([]string, len(tags))
+	for i := 0; i < len(tags); i++ {
+		res[i] = tags[i].Name
+	}
+	return res
 }

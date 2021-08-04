@@ -234,6 +234,26 @@ func (s *Suite) TestDeleteBySlugFail() {
 	}
 }
 
+func (s *Suite) TestFavoriteArticle() {
+	// TODO
+}
+
+func (s *Suite) TestFavoriteArticle_Fail() {
+	// TODO
+}
+
+func (s *Suite) TestUnFavoriteArticle() {
+	// TODO
+}
+
+func (s *Suite) TestUnFavoriteArticle_Fail() {
+	// TODO
+}
+
+func (s *Suite) TestFindTags() {
+	// TODO
+}
+
 func newArticle(title, description, body string, author userModel.User, tagValues []string) *model.Article {
 	var tags []*model.Tag
 	for _, value := range tagValues {
