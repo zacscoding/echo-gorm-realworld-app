@@ -1,4 +1,5 @@
-# ![RealWorld Example App](https://user-images.githubusercontent.com/25560203/128340208-d07d731e-883c-46df-bde3-e236fb326d24.png)
+# ![RealWorld Example App](https://user-images.githubusercontent.com/25560203/128340208-d07d731e-883c-46df-bde3-e236fb326d24.png)  
+![workflow](https://github.com/zacscoding/echo-gorm-realworld-app/actions/workflows/check.yaml/badge.svg)
 
 > ### Go/Echo/GORM codebase containing real world examples (CRUD, auth, advanced patterns, etc) that adheres to the [RealWorld](https://github.com/gothinkster/realworld) spec and API.
 
@@ -48,11 +49,13 @@ CONTAINER ID   IMAGE                                COMMAND                  CRE
 79db7c93b358   mysql:8.0.17                         "docker-entrypoint.s…"   18 minutes ago   Up 18 minutes   33060/tcp, 0.0.0.0:43306->3306/tcp, :::43306->3306/tcp   db
 ```
 
-This server will serve on localhost:8080.
+This server will serve on localhost:8080. Schema also migrated
+from [golang-migrate/migrate](github.com/golang-migrate/migrate) and [migrations](./migrations).
 
 - check api specs at http://localhost:8080/docs in ur browser.
 - see [docker-compose.yaml](./docker-compose.yaml) for more info.
 - see [config-docker.yaml](./config-docker.yaml) for configuration.
+- see [migrations](./migrations) for schema.
 
 # More commands
 
@@ -114,6 +117,6 @@ $ make it.postman
 
 # TODO
 
-- [] implement cache([go-redis/redis](https://github.com/go-redis/redis))
-- [] unit tests of article handler
-- [] integration tests with golang and [gavv/httpexpect](https://github.com/gavv/httpexpect)
+- [ ] implement cache([go-redis/redis](https://github.com/go-redis/redis))
+- [ ] unit tests of article handler
+- [ ] integration tests with golang and [gavv/httpexpect](https://github.com/gavv/httpexpect)
