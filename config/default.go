@@ -5,6 +5,8 @@ var defaultConfig = map[string]interface{}{
 	"server.timeout":      "5s",
 	"server.readTimeout":  "5s",
 	"server.writeTimeout": "10s",
+	"server.docs.enabled": true,
+	"server.docs.path":    "/config/doc.html",
 
 	"jwt.secret":         "secret-key",
 	"jwt.sessionTimeout": "240h",

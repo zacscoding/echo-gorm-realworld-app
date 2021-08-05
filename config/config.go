@@ -67,6 +67,10 @@ type ServerConfig struct {
 	Timeout      string `json:"timeout"`
 	ReadTimeout  string `json:"readTimeout"`
 	WriteTimeout string `json:"writeTimeout"`
+	Docs         struct {
+		Enabled bool   `json:"enabled"`
+		Path    string `json:"path"`
+	} `json:"docs"`
 }
 
 type JWTConfig struct {

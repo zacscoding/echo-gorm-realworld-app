@@ -16,6 +16,8 @@ func TestLoad(t *testing.T) {
 	equal(t, "5s", defaultConfig["server.timeout"].(string), cfg.ServerConfig.Timeout)
 	equal(t, "5s", defaultConfig["server.readTimeout"].(string), cfg.ServerConfig.ReadTimeout)
 	equal(t, "10s", defaultConfig["server.writeTimeout"].(string), cfg.ServerConfig.WriteTimeout)
+	equal(t, true, defaultConfig["server.docs.enabled"].(bool), cfg.ServerConfig.Docs.Enabled)
+	equal(t, "/config/doc.html", defaultConfig["server.docs.path"].(string), cfg.ServerConfig.Docs.Path)
 	// jwt configs
 	equal(t, "secret-key", defaultConfig["jwt.secret"].(string), cfg.JWTConfig.Secret)
 	equal(t, "240h", defaultConfig["jwt.sessionTimeout"].(string), cfg.JWTConfig.SessionTimeout)

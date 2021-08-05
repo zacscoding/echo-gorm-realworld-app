@@ -21,6 +21,7 @@ services:
     volumes:
       - ./config-docker.yaml:/config/config.yaml
       - ./migrations:/migrations
+      - ./docs/doc.html:/config/doc.html
     command: app-server --config /config/config.yaml
     restart: always
     depends_on:

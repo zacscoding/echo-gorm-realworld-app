@@ -3,6 +3,9 @@ server:
   timeout: 5s
   readTimeout: 5s
   writeTimeout: 10s
+  docs:
+    enabled: true
+    path: /config/doc.html
 jwt:
   secret: secret-key
   sessionTime: 86400s
