@@ -42,9 +42,9 @@ func (h *Handler) Route(e *echo.Group, authMiddleware echo.MiddlewareFunc) {
 	userGroup.GET("", h.handleCurrentUser)
 	userGroup.PUT("", h.handleUpdateUser)
 
-	profileGroup := e.Group("/profile")
+	profileGroup := e.Group("/profiles")
 	profileGroup.Use(authMiddleware)
 	profileGroup.GET("/:username", h.handleGetProfile)
 	profileGroup.POST("/:username/follow", h.handleFollow)
-	profileGroup.DELETE("/:username/unfollow", h.handleUnfollow)
+	profileGroup.DELETE("/:username/follow", h.handleUnfollow)
 }

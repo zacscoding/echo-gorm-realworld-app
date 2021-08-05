@@ -2,7 +2,6 @@ package types
 
 import (
 	articlemodel "github.com/zacscoding/echo-gorm-realworld-app/article/model"
-	"time"
 )
 
 // CommentResponse represents a single comment response.
@@ -33,18 +32,18 @@ func ToCommentsResponse(comments []*articlemodel.Comment) *CommentsResponse {
 }
 
 type Comment struct {
-	ID        uint      `json:"id"`
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
-	Body      string    `json:"body"`
-	Author    Author    `json:"author"`
+	ID        uint     `json:"id"`
+	CreatedAt JSONTime `json:"createdAt"`
+	UpdatedAt JSONTime `json:"updatedAt"`
+	Body      string   `json:"body"`
+	Author    Author   `json:"author"`
 }
 
 func toComment(c *articlemodel.Comment) *Comment {
 	return &Comment{
 		ID:        c.ID,
-		CreatedAt: c.CreatedAt,
-		UpdatedAt: c.UpdatedAt,
+		CreatedAt: JSONTime(c.CreatedAt),
+		UpdatedAt: JSONTime(c.UpdatedAt),
 		Body:      c.Body,
 		Author:    toAuthor(&c.Author),
 	}

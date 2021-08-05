@@ -297,7 +297,7 @@ func countArticleByQuery(ctx context.Context, db *gorm.DB, query model.ArticleQu
 
 func countArticleByAuthors(db *gorm.DB, authors []uint) (int64, error) {
 	var count int64
-	return count, db.Model(new(model.Article)).Where("author_id IN (?)", authors).Count(&count).Error
+	return count, db.Model(new(model.Article)).Where("deleted_at IS NULL AND author_id IN (?)", authors).Count(&count).Error
 }
 
 func buildArticleQuery(ctx context.Context, db *gorm.DB, query model.ArticleQuery) *gorm.DB {
@@ -306,7 +306,8 @@ func buildArticleQuery(ctx context.Context, db *gorm.DB, query model.ArticleQuer
 		Joins("LEFT JOIN tags t ON t.tag_id = at.tag_id").
 		Joins("LEFT JOIN article_favorites af ON af.article_id = a.article_id").
 		Joins("LEFT JOIN users u ON u.user_id = a.author_id").
-		Joins("LEFT JOIN users uf ON uf.user_id = af.user_id")
+		Joins("LEFT JOIN users uf ON uf.user_id = af.user_id").
+		Where("a.deleted_at IS NULL")
 	if query.Tag != "" {
 		db = db.Where("t.name = ?", query.Tag)
 	}

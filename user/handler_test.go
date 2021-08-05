@@ -58,7 +58,7 @@ func (s *TestSuite) SetupSuite() {
 		jwtDuration: time.Hour,
 	}
 	h.Route(apiGroup, authutils.NewJWTMiddleware(map[string]struct{}{
-		"/api/profile/:username": {},
+		"/api/profiles/:username": {},
 	}, cfg.JWTConfig.Secret))
 
 	s.e = e

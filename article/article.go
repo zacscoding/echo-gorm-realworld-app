@@ -19,7 +19,7 @@ func (h *Handler) handleGetArticles(c echo.Context) error {
 	var (
 		ctx         = c.Request().Context()
 		logger      = logging.FromContext(ctx)
-		query       = ArticleQuery{}
+		query       = ArticleQuery{PageableQuery: &PageableQuery{}}
 		currentUser = h.currentUser(c)
 	)
 

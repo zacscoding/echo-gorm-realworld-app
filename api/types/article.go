@@ -3,7 +3,6 @@ package types
 import (
 	articlemodel "github.com/zacscoding/echo-gorm-realworld-app/article/model"
 	userModel "github.com/zacscoding/echo-gorm-realworld-app/user/model"
-	"time"
 )
 
 // ArticleResponse represents a single article response.
@@ -46,16 +45,16 @@ func ToTagsResponse(tags []*articlemodel.Tag) *TagsResponse {
 }
 
 type Article struct {
-	Slug           string    `json:"slug"`
-	Title          string    `json:"title"`
-	Description    string    `json:"description"`
-	Body           string    `json:"body"`
-	Tags           []string  `json:"tagList"`
-	CreatedAt      time.Time `json:"createdAt"`
-	UpdatedAt      time.Time `json:"updatedAt"`
-	Favorited      bool      `json:"favorited"`
-	FavoritesCount int       `json:"favoritesCount"`
-	Author         Author    `json:"author"`
+	Slug           string   `json:"slug"`
+	Title          string   `json:"title"`
+	Description    string   `json:"description"`
+	Body           string   `json:"body"`
+	Tags           []string `json:"tagList"`
+	CreatedAt      JSONTime `json:"createdAt"`
+	UpdatedAt      JSONTime `json:"updatedAt"`
+	Favorited      bool     `json:"favorited"`
+	FavoritesCount int      `json:"favoritesCount"`
+	Author         Author   `json:"author"`
 }
 
 type Author struct {
@@ -81,8 +80,8 @@ func toArticle(a *articlemodel.Article) *Article {
 		Description:    a.Description,
 		Body:           a.Body,
 		Tags:           toTags(a.Tags),
-		CreatedAt:      a.CreatedAt,
-		UpdatedAt:      a.UpdatedAt,
+		CreatedAt:      JSONTime(a.CreatedAt),
+		UpdatedAt:      JSONTime(a.UpdatedAt),
 		Favorited:      a.Favorited,
 		FavoritesCount: a.FavoritesCount,
 		Author:         toAuthor(&a.Author),

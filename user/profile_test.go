@@ -69,7 +69,7 @@ func (s *TestSuite) TestHandleGetProfile() {
 				s.resetMocks()
 				tc.setupMock(s.u)
 			}
-			req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/profile/%s", tc.username), nil)
+			req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/profiles/%s", tc.username), nil)
 			req.Header.Set("Content-Type", "application/json")
 			if tc.currentUser != nil {
 				token, _ := s.h.makeJWTToken(tc.currentUser)
@@ -148,7 +148,7 @@ func (s *TestSuite) TestHandleFollow() {
 				s.resetMocks()
 				tc.setupMock(s.u)
 			}
-			req, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("/api/profile/%s/follow", tc.username), nil)
+			req, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("/api/profiles/%s/follow", tc.username), nil)
 			req.Header.Set("Content-Type", "application/json")
 			if tc.currentUser != nil {
 				token, _ := s.h.makeJWTToken(tc.currentUser)
@@ -227,7 +227,7 @@ func (s *TestSuite) TestHandleUnFollow() {
 				s.resetMocks()
 				tc.setupMock(s.u)
 			}
-			req, _ := http.NewRequest(http.MethodDelete, fmt.Sprintf("/api/profile/%s/unfollow", tc.username), nil)
+			req, _ := http.NewRequest(http.MethodDelete, fmt.Sprintf("/api/profiles/%s/follow", tc.username), nil)
 			req.Header.Set("Content-Type", "application/json")
 			if tc.currentUser != nil {
 				token, _ := s.h.makeJWTToken(tc.currentUser)

@@ -174,7 +174,7 @@ func (adb *articleDB) UnFavoriteArticle(ctx context.Context, user *userModel.Use
 	logger = logger.With("userID", user.ID, "articleID", articleID)
 	logger.Debug("ArticleDB_UnFavoriteArticle try to unfavorite an article")
 
-	result := adb.db.WithContext(ctx).Where("article_id = ? AND author_id = ?", articleID, user.ID).Delete(new(model.ArticleFavorite))
+	result := adb.db.WithContext(ctx).Unscoped().Where("article_id = ? AND user_id = ?", articleID, user.ID).Delete(new(model.ArticleFavorite))
 	if result.Error != nil {
 		logger.Errorw("ArticleDB_UnFavoriteArticle failed to unfavorite", "err", result.Error)
 		return database.WrapError(result.Error)
