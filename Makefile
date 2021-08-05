@@ -1,3 +1,5 @@
+MODULE = $(shell go list -m)
+
 .PHONY: docs generate test lint cleantests compose
 
 cleantests:
@@ -28,9 +30,15 @@ lint:
 generate:
 	@go generate ./...
 
+build: # build a server
+	go build -a -o app-server $(MODULE)
+
 compose.%:
 	$(eval CMD=${subst compose.,,$(@)})
 	./scripts/compose.sh ${CMD}
+
+it.postman:
+	@bash integration/postman/run-api-tests.sh
 
 docs:
 	redoc-cli bundle ./docs/swagger.json -o ./docs/doc.html

@@ -7,6 +7,7 @@ import (
 	"github.com/zacscoding/echo-gorm-realworld-app/database"
 	userMocks "github.com/zacscoding/echo-gorm-realworld-app/user/database/mocks"
 	userModel "github.com/zacscoding/echo-gorm-realworld-app/user/model"
+	"github.com/zacscoding/echo-gorm-realworld-app/utils/authutils"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -72,7 +73,7 @@ func (s *TestSuite) TestHandleGetProfile() {
 			req.Header.Set("Content-Type", "application/json")
 			if tc.currentUser != nil {
 				token, _ := s.h.makeJWTToken(tc.currentUser)
-				req.Header.Set("Authorization", "Bearer "+token)
+				authutils.SetAuthToken(req, token)
 			}
 			rec := httptest.NewRecorder()
 
@@ -151,7 +152,7 @@ func (s *TestSuite) TestHandleFollow() {
 			req.Header.Set("Content-Type", "application/json")
 			if tc.currentUser != nil {
 				token, _ := s.h.makeJWTToken(tc.currentUser)
-				req.Header.Set("Authorization", "Bearer "+token)
+				authutils.SetAuthToken(req, token)
 			}
 			rec := httptest.NewRecorder()
 
@@ -230,7 +231,7 @@ func (s *TestSuite) TestHandleUnFollow() {
 			req.Header.Set("Content-Type", "application/json")
 			if tc.currentUser != nil {
 				token, _ := s.h.makeJWTToken(tc.currentUser)
-				req.Header.Set("Authorization", "Bearer "+token)
+				authutils.SetAuthToken(req, token)
 			}
 			rec := httptest.NewRecorder()
 

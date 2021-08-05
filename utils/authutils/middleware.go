@@ -21,6 +21,7 @@ func NewJWTMiddleware(optionalAuthPaths map[string]struct{}, secret string) echo
 			TokenLookup: "header:Authorization",
 			Claims:      &JWTClaims{},
 			SigningKey:  []byte(secret),
+			AuthScheme:  AuthScheme,
 			ErrorHandlerWithContext: func(err error, ctx echo.Context) error {
 				logging.FromContext(ctx.Request().Context()).Errorw("auth failed", "err", err)
 				return httputils.NewUnauthorized()

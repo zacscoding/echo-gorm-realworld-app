@@ -9,6 +9,7 @@ import (
 	"github.com/zacscoding/echo-gorm-realworld-app/database"
 	userMocks "github.com/zacscoding/echo-gorm-realworld-app/user/database/mocks"
 	userModel "github.com/zacscoding/echo-gorm-realworld-app/user/model"
+	"github.com/zacscoding/echo-gorm-realworld-app/utils/authutils"
 	"github.com/zacscoding/echo-gorm-realworld-app/utils/hashutils"
 	"net/http"
 	"net/http/httptest"
@@ -292,7 +293,7 @@ func (s *TestSuite) TestHandleCurrentUser() {
 	req, _ := http.NewRequest(http.MethodGet, uri, nil)
 	token, _ := s.h.makeJWTToken(defaultUsers[0])
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+token)
+	authutils.SetAuthToken(req, token)
 
 	s.e.ServeHTTP(rec, req)
 
@@ -331,7 +332,7 @@ func (s *TestSuite) TestHandleUpdateUser() {
 	}))
 	token, _ := s.h.makeJWTToken(updatedUser)
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+token)
+	authutils.SetAuthToken(req, token)
 
 	s.e.ServeHTTP(rec, req)
 

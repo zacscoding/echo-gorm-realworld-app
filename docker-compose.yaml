@@ -11,3 +11,17 @@ services:
     ports:
       - 43306:3306
     hostname: db
+  app-server:
+    image: zacscoding/echo-gorm-realworld-app
+    build:
+      context: .
+    container_name: app-server
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./config-docker.yaml:/config/config.yaml
+      - ./migrations:/migrations
+    command: app-server --config /config/config.yaml
+    restart: always
+    depends_on:
+      - "db"
