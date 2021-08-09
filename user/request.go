@@ -46,7 +46,7 @@ func (r *SignInRequest) Bind(ctx echo.Context) error {
 type UpdateUserRequest struct {
 	User struct {
 		Username string `json:"username" validate:"omitempty"`
-		Email    string `json:"email" validate:"omitempty"`
+		Email    string `json:"email" validate:"email,omitempty"`
 		Password string `json:"password" validate:"omitempty"`
 		Bio      string `json:"bio" validate:"omitempty"`
 		Image    string `json:"image" validate:"omitempty"`
@@ -61,7 +61,7 @@ func (r *UpdateUserRequest) Bind(ctx echo.Context, u *userModel.User) error {
 		u.Name = r.User.Username
 	}
 	if r.User.Email != "" {
-		u.Name = r.User.Email
+		u.Email = r.User.Email
 	}
 	if r.User.Password != "" {
 		password, err := hashutils.EncodePassword(r.User.Password)

@@ -31,7 +31,7 @@ generate:
 	@go generate ./...
 
 build: # build a server
-	go build -a -o app-server $(MODULE)
+	@go build -a -o app-server $(MODULE)
 
 compose.%:
 	$(eval CMD=${subst compose.,,$(@)})
@@ -39,6 +39,9 @@ compose.%:
 
 it.postman:
 	@bash integration/postman/run-api-tests.sh
+
+it.e2e:
+	@cd ./integration && go test ./... -v
 
 docs:
 	redoc-cli bundle ./docs/swagger.json -o ./docs/doc.html

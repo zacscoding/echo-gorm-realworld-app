@@ -94,7 +94,7 @@ func (db *userDB) Update(ctx context.Context, u *model.User) error {
 		return database.WrapError(result.Error)
 	}
 	if result.RowsAffected != 1 {
-		logger.Error("UserDB_Update failed to update an user. zero rows affected")
+		logger.Errorf("UserDB_Update failed to update an user. rows affected: %d", result.RowsAffected)
 		return database.WrapError(gorm.ErrRecordNotFound)
 	}
 	return nil
