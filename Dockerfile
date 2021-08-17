@@ -1,4 +1,4 @@
-FROM golang:1.14-alpine AS build
+FROM golang:1.15-alpine AS build
 
 RUN mkdir -p /go/src/github.com/zacscoding/echo-gorm-realworld-app ~/.ssh && \
     apk add --no-cache git openssh-client make gcc libc-dev
