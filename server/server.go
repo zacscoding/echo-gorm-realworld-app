@@ -1,11 +1,13 @@
 package server
 
 import (
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/pkg/errors"
 	"github.com/zacscoding/echo-gorm-realworld-app/article"
 	"github.com/zacscoding/echo-gorm-realworld-app/config"
+	"github.com/zacscoding/echo-gorm-realworld-app/logging"
 	"github.com/zacscoding/echo-gorm-realworld-app/serverenv"
 	"github.com/zacscoding/echo-gorm-realworld-app/user"
 	"github.com/zacscoding/echo-gorm-realworld-app/utils/authutils"
@@ -22,7 +24,16 @@ type Server struct {
 func New(env *serverenv.ServerEnv, conf *config.Config) (*Server, error) {
 	// Setup echo and middlewares.
 	e := echo.New()
-	e.Use(middleware.Recover())
+	e.Use(middleware.Recover(), middleware.RequestIDWithConfig(middleware.RequestIDConfig{
+		Generator: func() string {
+			return uuid.NewString()
+		},
+		RequestIDHandler: func(c echo.Context, requestID string) {
+			logger := logging.DefaultLogger().With("x-request-id", requestID)
+			ctx := logging.WithLogger(c.Request().Context(), logger)
+			c.SetRequest(c.Request().WithContext(ctx))
+		},
+	}))
 	e.Validator = httputils.NewValidator()
 	v1 := e.Group("/api")
 	authMiddleware := authutils.NewJWTMiddleware(
