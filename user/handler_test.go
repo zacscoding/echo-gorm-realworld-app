@@ -3,6 +3,7 @@ package user
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/jinzhu/copier"
 	"github.com/labstack/echo/v4"
@@ -137,4 +138,20 @@ func toJsonReader(m map[string]interface{}) io.Reader {
 		panic(err)
 	}
 	return bytes.NewReader(b)
+}
+
+func keyValuesToMapIfNotEmpty(keyValues ...string) (map[string]interface{}, error) {
+	if len(keyValues)%2 != 0 {
+		return nil, errors.New("require key value pairs")
+	}
+
+	m := make(map[string]interface{}, len(keyValues)/2)
+	for i := 0; i < len(keyValues); i += 2 {
+		k := keyValues[i]
+		v := keyValues[i+1]
+		if v != "" {
+			m[k] = v
+		}
+	}
+	return m, nil
 }

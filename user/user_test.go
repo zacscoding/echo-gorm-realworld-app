@@ -303,12 +303,44 @@ func (s *TestSuite) TestHandleCurrentUser() {
 	assertUserResponse(s.T(), rec.Body.String(), defaultUsers[0], false)
 }
 
-func (s *TestSuite) TestHandleCurrentUser_BindError() {
-	// TODO
-}
-
 func (s *TestSuite) TestHandleCurrentUser_Fail() {
-	// TODO
+	cases := []struct {
+		name          string
+		setupMock     func(m *userMocks.UserDB)
+		tokenProvider func() string
+		// expected
+		code int
+		msg  string
+	}{
+		{
+			name:          "empty auth token",
+			setupMock:     func(m *userMocks.UserDB) {},
+			tokenProvider: func() string { return "" },
+			code:          http.StatusUnauthorized,
+			msg:           "auth required",
+		},
+	}
+
+	for _, tc := range cases {
+		s.T().Run(tc.name, func(t *testing.T) {
+			s.resetMocks()
+			tc.setupMock(s.u)
+
+			uri := "/api/user"
+			rec := httptest.NewRecorder()
+			req, _ := http.NewRequest(http.MethodGet, uri, nil)
+			token := tc.tokenProvider()
+			if token != "" {
+				req.Header.Set("Content-Type", "application/json")
+				authutils.SetAuthToken(req, token)
+			}
+
+			s.e.ServeHTTP(rec, req)
+
+			assert.Equal(t, tc.code, rec.Code)
+			assert.Contains(t, gjson.Get(rec.Body.String(), "errors.body").String(), tc.msg)
+		})
+	}
 }
 
 func (s *TestSuite) TestHandleUpdateUser() {
@@ -344,9 +376,111 @@ func (s *TestSuite) TestHandleUpdateUser() {
 }
 
 func (s *TestSuite) TestHandleUpdateUser_BindError() {
-	// TODO
+	cases := []struct {
+		name     string
+		email    string
+		username string
+		password string
+		image    string
+		bio      string
+		// expected
+		code int
+		msg  string
+	}{
+		{
+			name:  "not email pattern",
+			email: "notemail",
+			code:  http.StatusUnprocessableEntity,
+			msg:   "Email validation error. reason: email",
+		},
+	}
+
+	for _, tc := range cases {
+		s.T().Run(tc.name, func(t *testing.T) {
+			user := &userModel.User{}
+			copier.Copy(user, defaultUsers[0])
+			s.u.On("FindByID", mock.Anything, user.ID).Return(copyUser(user), nil)
+
+			uri := "/api/user"
+			rec := httptest.NewRecorder()
+			body, err := keyValuesToMapIfNotEmpty("email", tc.email, "username", tc.username,
+				"password", tc.password, "image", tc.image, "bio", tc.bio)
+			assert.NoError(t, err)
+
+			req, _ := http.NewRequest(http.MethodPut, uri, toJsonReader(map[string]interface{}{
+				"user": body,
+			}))
+			token, _ := s.h.makeJWTToken(user)
+			req.Header.Set("Content-Type", "application/json")
+			authutils.SetAuthToken(req, token)
+
+			s.e.ServeHTTP(rec, req)
+
+			assert.Equal(t, tc.code, rec.Code)
+			assert.Contains(t, gjson.Get(rec.Body.String(), "errors.body").String(), tc.msg)
+		})
+	}
 }
 
 func (s *TestSuite) TestHandleUpdateUser_Fail() {
-	// TODO
+	user := &userModel.User{}
+	copier.Copy(user, defaultUsers[0])
+	token, _ := s.h.makeJWTToken(user)
+
+	cases := []struct {
+		name      string
+		authToken string
+		email     string
+		username  string
+		password  string
+		image     string
+		bio       string
+		setupMock func(m *userMocks.UserDB)
+		// expected
+		code int
+		msg  string
+	}{
+		{
+			name:      "empty auth token",
+			authToken: "",
+			setupMock: func(m *userMocks.UserDB) {},
+			code:      http.StatusUnauthorized,
+			msg:       "auth required",
+		}, {
+			name:      "any error",
+			authToken: token,
+			email:     "newemail@gamil.com",
+			setupMock: func(m *userMocks.UserDB) {
+				m.On("FindByID", mock.Anything, user.ID).Return(copyUser(user), nil)
+				m.On("Update", mock.Anything, mock.Anything).Return(errors.New("force error"))
+			},
+			code: http.StatusInternalServerError,
+			msg:  "force error",
+		},
+	}
+
+	for _, tc := range cases {
+		s.T().Run(tc.name, func(t *testing.T) {
+			s.resetMocks()
+			tc.setupMock(s.u)
+			uri := "/api/user"
+			rec := httptest.NewRecorder()
+			body, err := keyValuesToMapIfNotEmpty("email", tc.email, "username", tc.username,
+				"password", tc.password, "image", tc.image, "bio", tc.bio)
+			assert.NoError(t, err)
+
+			req, _ := http.NewRequest(http.MethodPut, uri, toJsonReader(map[string]interface{}{
+				"user": body,
+			}))
+			req.Header.Set("Content-Type", "application/json")
+			if tc.authToken != "" {
+				authutils.SetAuthToken(req, token)
+			}
+
+			s.e.ServeHTTP(rec, req)
+
+			assert.Equal(t, tc.code, rec.Code)
+			assert.Contains(t, gjson.Get(rec.Body.String(), "errors.body").String(), tc.msg)
+		})
+	}
 }

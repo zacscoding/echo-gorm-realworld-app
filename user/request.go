@@ -46,7 +46,7 @@ func (r *SignInRequest) Bind(ctx echo.Context) error {
 type UpdateUserRequest struct {
 	User struct {
 		Username string `json:"username" validate:"omitempty"`
-		Email    string `json:"email" validate:"email,omitempty"`
+		Email    string `json:"email" validate:"omitempty,email"`
 		Password string `json:"password" validate:"omitempty"`
 		Bio      string `json:"bio" validate:"omitempty"`
 		Image    string `json:"image" validate:"omitempty"`
