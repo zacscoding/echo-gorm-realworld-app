@@ -2,6 +2,7 @@ package config
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
@@ -38,7 +39,7 @@ func equal(t *testing.T, expected, defaultValue, actualValue interface{}) {
 
 func TestLoadWithEnv(t *testing.T) {
 	// given
-	err := os.Setenv("REALWORLD_APP_SERVER_PORT", "4000")
+	err := os.Setenv(fmt.Sprintf("%sSERVER_PORT", EnvPrefix), "4000")
 	assert.NoError(t, err)
 
 	// when
@@ -51,7 +52,7 @@ func TestLoadWithEnv(t *testing.T) {
 
 func TestLoadWithConfigFile(t *testing.T) {
 	// given
-	err := os.Setenv("REALWORLD_APP_SERVER_PORT", "4000")
+	err := os.Setenv(fmt.Sprintf("%sSERVER_PORT", EnvPrefix), "4000")
 	assert.NoError(t, err)
 
 	// when
