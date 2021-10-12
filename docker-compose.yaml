@@ -15,11 +15,12 @@ services:
     image: zacscoding/echo-gorm-realworld-app
     build:
       context: .
+      dockerfile: cmd/server/Dockerfile
     container_name: app-server
     ports:
       - "8080:8080"
     volumes:
-      - ./config-docker.yaml:/config/config.yaml
+      - ./fixtures/config/config-docker.yaml:/config/config.yaml
       - ./migrations:/migrations
       - ./docs/doc.html:/config/doc.html
     command: app-server --config /config/config.yaml

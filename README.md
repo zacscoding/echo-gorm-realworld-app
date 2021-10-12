@@ -54,7 +54,7 @@ from [golang-migrate/migrate](github.com/golang-migrate/migrate) and [migrations
 
 - check api specs at http://localhost:8080/docs in ur browser.
 - see [docker-compose.yaml](./docker-compose.yaml) for more info.
-- see [config-docker.yaml](./config-docker.yaml) for configuration.
+- see [config-docker.yaml](fixtures/config/config-docker.yaml) for configuration.
 - see [migrations](./migrations) for schema.
 
 # More commands

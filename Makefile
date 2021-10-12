@@ -31,11 +31,11 @@ generate:
 	@go generate ./...
 
 build: # build a server
-	@go build -a -o app-server $(MODULE)
+	@go build -a -o app-server $(MODULE)/cmd/server
 
 compose.%:
 	$(eval CMD=${subst compose.,,$(@)})
-	./scripts/compose.sh ${CMD}
+	./fixtures/scripts/compose.sh ${CMD}
 
 it.postman:
 	@bash integration/postman/run-api-tests.sh

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/gavv/httpexpect/v2"
 	"github.com/google/uuid"
-	"github.com/zacscoding/echo-gorm-realworld-app/api/types"
+	"github.com/zacscoding/echo-gorm-realworld-app/pkg/api/types"
 	"io/ioutil"
 	"log"
 	"net/http"
