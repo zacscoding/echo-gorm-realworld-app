@@ -19,7 +19,7 @@ type Handler struct {
 func NewHandler(env *serverenv.ServerEnv, conf *config.Config) (*Handler, error) {
 	return &Handler{
 		cfg:         conf,
-		userDB:      userDB.NewUserDB(conf, env.GetDB()),
+		userDB:      env.GetUserDB(),
 		jwtSecret:   []byte(conf.JWTConfig.Secret),
 		jwtDuration: conf.JWTConfig.SessionTimeout,
 	}, nil

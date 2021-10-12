@@ -1,5 +1,5 @@
 logging:
-  level: 5 # -1: debug, 0: info, 1: warn, 2: error, 3: dpanic, 4: panic, 5: fatal
+  level: 0 # -1: debug, 0: info, 1: warn, 2: error, 3: dpanic, 4: panic, 5: fatal
   encoding: console # [console, json]
   development: false
 
@@ -15,6 +15,7 @@ server:
 jwt:
   secret: secret-key
   sessionTime: 86400s
+
 db:
   #dataSourceName: root:password@tcp(db)/local_db?charset=utf8&parseTime=True&multiStatements=true
   dataSourceName: root:password@(localhost:43306)/local_db?charset=utf8&parseTime=True&multiStatements=true
@@ -25,3 +26,21 @@ db:
     maxOpen: 50
     maxIdle: 5
     maxLifetime: 86400s
+
+cache:
+  enabled: true
+  prefix: realworld-
+  type: redis
+  ttl: 60s
+  redis:
+    cluster: true
+    endpoints:
+      - localhost:17000
+    readTimeout: 3s
+    writeTimeout: 3s
+    dialTimeout: 5s
+    poolSize: 10
+    poolTimeout: 1m
+    maxConnAge: 0
+    idleTimeout: 5m
+

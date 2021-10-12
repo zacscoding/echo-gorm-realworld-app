@@ -23,4 +23,18 @@ var defaultConfig = map[string]interface{}{
 	"db.pool.maxOpen":     50,
 	"db.pool.maxIdle":     5,
 	"db.pool.maxLifetime": 86400 * time.Second,
+
+	"cache.enabled":            false,
+	"cache.prefix":             "rewalworld-",
+	"cache.type":               "redis",
+	"cache.ttl":                60 * time.Second,
+	"cache.redis.cluster":      false,
+	"cache.redis.endpoints":    []string{"localhost:6379"},
+	"cache.redis.readTimeout":  3 * time.Second,
+	"cache.redis.writeTimeout": 3 * time.Second,
+	"cache.redis.dialTimeout":  5 * time.Second,
+	"cache.redis.poolSize":     10,
+	"cache.redis.poolTimeout":  1 * time.Minute,
+	"cache.redis.maxConnAge":   time.Duration(0),
+	"cache.redis.idleTimeout":  5 * time.Minute,
 }

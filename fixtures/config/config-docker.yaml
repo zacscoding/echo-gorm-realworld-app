@@ -23,3 +23,20 @@ db:
     maxOpen: 50
     maxIdle: 5
     maxLifetime: 86400s
+cache:
+  enabled: true
+  prefix: realworld-
+  type: redis
+  ttl: 60s
+  redis:
+    cluster: true
+    endpoints:
+      - redis:17000
+    readTimeout: 3s
+    writeTimeout: 3s
+    dialTimeout: 5s
+    poolSize: 10
+    poolTimeout: 1m
+    maxConnAge: 0
+    idleTimeout: 5m
+

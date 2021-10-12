@@ -11,6 +11,14 @@ services:
     ports:
       - 43306:3306
     hostname: db
+  redis:
+    container_name: redis
+    image: grokzen/redis-cluster:6.0.8
+    ports:
+      - "17000-17005:17000-17005"
+    environment:
+      - IP=0.0.0.0
+      - INITIAL_PORT=17000
   app-server:
     image: zacscoding/echo-gorm-realworld-app
     build:

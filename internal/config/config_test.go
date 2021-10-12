@@ -36,6 +36,20 @@ func TestLoad(t *testing.T) {
 	equal(t, 50, defaultConfig["db.pool.maxOpen"].(int), cfg.DBConfig.Pool.MaxOpen)
 	equal(t, 5, defaultConfig["db.pool.maxIdle"].(int), cfg.DBConfig.Pool.MaxIdle)
 	equal(t, 86400*time.Second, defaultConfig["db.pool.maxLifetime"].(time.Duration), cfg.DBConfig.Pool.MaxLifetime)
+	// redis configs
+	equal(t, false, defaultConfig["cache.enabled"].(bool), cfg.CacheConfig.Enabled)
+	equal(t, "rewalworld-", defaultConfig["cache.prefix"].(string), cfg.CacheConfig.Prefix)
+	equal(t, "redis", defaultConfig["cache.type"].(string), cfg.CacheConfig.Type)
+	equal(t, 60*time.Second, defaultConfig["cache.ttl"].(time.Duration), cfg.CacheConfig.TTL)
+	equal(t, false, defaultConfig["cache.redis.cluster"].(bool), cfg.CacheConfig.RedisConfig.Cluster)
+	equal(t, []string{"localhost:6379"}, defaultConfig["cache.redis.endpoints"].([]string), cfg.CacheConfig.RedisConfig.Endpoints)
+	equal(t, 3*time.Second, defaultConfig["cache.redis.readTimeout"].(time.Duration), cfg.CacheConfig.RedisConfig.ReadTimeout)
+	equal(t, 3*time.Second, defaultConfig["cache.redis.writeTimeout"].(time.Duration), cfg.CacheConfig.RedisConfig.WriteTimeout)
+	equal(t, 5*time.Second, defaultConfig["cache.redis.dialTimeout"].(time.Duration), cfg.CacheConfig.RedisConfig.DialTimeout)
+	equal(t, 10, defaultConfig["cache.redis.poolSize"].(int), cfg.CacheConfig.RedisConfig.PoolSize)
+	equal(t, 1*time.Minute, defaultConfig["cache.redis.poolTimeout"].(time.Duration), cfg.CacheConfig.RedisConfig.PoolTimeout)
+	equal(t, 0, defaultConfig["cache.redis.maxConnAge"].(time.Duration), cfg.CacheConfig.RedisConfig.MaxConnAge)
+	equal(t, 5*time.Minute, defaultConfig["cache.redis.idleTimeout"].(time.Duration), cfg.CacheConfig.RedisConfig.IdleTimeout)
 }
 
 func equal(t *testing.T, expected, defaultValue, actualValue interface{}) {

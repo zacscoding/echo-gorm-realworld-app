@@ -120,3 +120,4 @@ $ make it.postman
 - [ ] implement cache([go-redis/redis](https://github.com/go-redis/redis))
 - [ ] unit tests of article handler
 - [ ] integration tests with golang and [gavv/httpexpect](https://github.com/gavv/httpexpect)
+- [ ] monitoring(prometheus + grafana) 

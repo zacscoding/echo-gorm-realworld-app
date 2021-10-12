@@ -13,9 +13,9 @@ CREATE TABLE users
     updated_at datetime NULL,
     deleted_at datetime NULL,
     disabled   TINYINT(1) default 0,
-    UNIQUE KEY unique_users_email (email)
+    UNIQUE KEY unique_users_email (email),
+    UNIQUE KEY unique_users_name (name)
 ) CHARACTER SET utf8mb4;
-CREATE INDEX idx_users_name ON users (name);
 
 -- -----------------------------------------------------
 -- follow

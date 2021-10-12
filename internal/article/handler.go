@@ -18,8 +18,8 @@ type Handler struct {
 func NewHandler(env *serverenv.ServerEnv, conf *config.Config) (*Handler, error) {
 	return &Handler{
 		cfg:       conf,
-		articleDB: articleDB.NewArticleDB(conf, env.GetDB()),
-		userDB:    userDB.NewUserDB(conf, env.GetDB()),
+		articleDB: env.GetArticleDB(),
+		userDB:    env.GetUserDB(),
 	}, nil
 }
 

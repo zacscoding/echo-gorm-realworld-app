@@ -3,14 +3,16 @@ module github.com/zacscoding/echo-gorm-realworld-app
 go 1.15
 
 require (
+	github.com/alicebob/miniredis/v2 v2.17.0
 	github.com/containerd/containerd v1.5.2 // indirect
 	github.com/docker/docker v20.10.6+incompatible // indirect
 	github.com/go-playground/validator/v10 v10.6.1
+	github.com/go-redis/cache/v8 v8.4.3
+	github.com/go-redis/redis/v8 v8.11.4
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/go-testfixtures/testfixtures/v3 v3.6.1
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/golang-migrate/migrate v3.5.4+incompatible
-	github.com/google/go-cmp v0.5.6 // indirect
 	github.com/google/uuid v1.2.0
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/gosimple/slug v1.10.0
@@ -23,7 +25,6 @@ require (
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/ory/dockertest/v3 v3.6.5
 	github.com/pkg/errors v0.9.1
-	github.com/sirupsen/logrus v1.8.1 // indirect
 	github.com/stretchr/testify v1.7.0
 	github.com/tidwall/gjson v1.8.0
 	go.uber.org/zap v1.17.0
