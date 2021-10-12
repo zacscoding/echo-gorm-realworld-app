@@ -15,11 +15,11 @@ type Handler struct {
 }
 
 // NewHandler returns a new Handle from given serverenv.ServerEnv and config.Config.
-func NewHandler(env *serverenv.ServerEnv, cfg *config.Config) (*Handler, error) {
+func NewHandler(env *serverenv.ServerEnv, conf *config.Config) (*Handler, error) {
 	return &Handler{
-		cfg:       cfg,
-		articleDB: articleDB.NewArticleDB(cfg, env.GetDB()),
-		userDB:    userDB.NewUserDB(cfg, env.GetDB()),
+		cfg:       conf,
+		articleDB: articleDB.NewArticleDB(conf, env.GetDB()),
+		userDB:    userDB.NewUserDB(conf, env.GetDB()),
 	}, nil
 }
 

@@ -1,3 +1,8 @@
+logging:
+  level: 5 # -1: debug, 0: info, 1: warn, 2: error, 3: dpanic, 4: panic, 5: fatal
+  encoding: console # [console, json]
+  development: false
+
 server:
   port: 8080
   timeout: 5s

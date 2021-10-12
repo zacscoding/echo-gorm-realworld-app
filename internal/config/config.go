@@ -13,6 +13,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"time"
 )
 
 const (
@@ -22,17 +23,24 @@ const (
 type Option func(k *koanf.Koanf) error
 
 type Config struct {
-	C            *koanf.Koanf
-	ServerConfig ServerConfig `json:"server"`
-	JWTConfig    JWTConfig    `json:"jwt"`
-	DBConfig     DBConfig     `json:"db"`
+	C             *koanf.Koanf
+	LoggingConfig LoggingConfig `json:"logging"`
+	ServerConfig  ServerConfig  `json:"server"`
+	JWTConfig     JWTConfig     `json:"jwt"`
+	DBConfig      DBConfig      `json:"db"`
+}
+
+type LoggingConfig struct {
+	Level       int    `json:"level"`
+	Encoding    string `json:"encoding"`
+	Development bool   `json:"development"`
 }
 
 type ServerConfig struct {
-	Port         int    `json:"port"`
-	Timeout      string `json:"timeout"`
-	ReadTimeout  string `json:"readTimeout"`
-	WriteTimeout string `json:"writeTimeout"`
+	Port         int           `json:"port"`
+	Timeout      time.Duration `json:"timeout"`
+	ReadTimeout  time.Duration `json:"readTimeout"`
+	WriteTimeout time.Duration `json:"writeTimeout"`
 	Docs         struct {
 		Enabled bool   `json:"enabled"`
 		Path    string `json:"path"`
@@ -40,8 +48,8 @@ type ServerConfig struct {
 }
 
 type JWTConfig struct {
-	Secret         string `json:"secret"`
-	SessionTimeout string `json:"sessionTimeout"`
+	Secret         string        `json:"secret"`
+	SessionTimeout time.Duration `json:"sessionTimeout"`
 }
 
 type DBConfig struct {
@@ -51,9 +59,9 @@ type DBConfig struct {
 		Dir    string `json:"dir"`
 	} `json:"migrate"`
 	Pool struct {
-		MaxOpen     int    `json:"maxOpen"`
-		MaxIdle     int    `json:"maxIdle"`
-		MaxLifetime string `json:"maxLifetime"`
+		MaxOpen     int           `json:"maxOpen"`
+		MaxIdle     int           `json:"maxIdle"`
+		MaxLifetime time.Duration `json:"maxLifetime"`
 	} `json:"pool"`
 }
 

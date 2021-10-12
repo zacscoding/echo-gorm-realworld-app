@@ -9,7 +9,7 @@ import (
 )
 
 // NewDatabase creates a new gorm.DB from given config.
-func NewDatabase(cfg *config.Config) (*gorm.DB, error) {
+func NewDatabase(conf *config.Config) (*gorm.DB, error) {
 	var (
 		db     *gorm.DB
 		err    error
@@ -17,7 +17,7 @@ func NewDatabase(cfg *config.Config) (*gorm.DB, error) {
 	)
 
 	for i := 0; i < 10; i++ {
-		db, err = gorm.Open(mysql.Open(cfg.DBConfig.DataSourceName), &gorm.Config{
+		db, err = gorm.Open(mysql.Open(conf.DBConfig.DataSourceName), &gorm.Config{
 			Logger: logger,
 		})
 		if err == nil {
@@ -33,16 +33,12 @@ func NewDatabase(cfg *config.Config) (*gorm.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	sqlDB.SetMaxOpenConns(cfg.DBConfig.Pool.MaxOpen)
-	sqlDB.SetMaxIdleConns(cfg.DBConfig.Pool.MaxIdle)
-	poolMaxLifetime, err := time.ParseDuration(cfg.DBConfig.Pool.MaxLifetime)
-	if err != nil {
-		return nil, err
-	}
-	sqlDB.SetConnMaxLifetime(poolMaxLifetime)
+	sqlDB.SetMaxOpenConns(conf.DBConfig.Pool.MaxOpen)
+	sqlDB.SetMaxIdleConns(conf.DBConfig.Pool.MaxIdle)
+	sqlDB.SetConnMaxLifetime(conf.DBConfig.Pool.MaxLifetime)
 
-	if cfg.DBConfig.Migrate.Enable {
-		err := migrateDB(cfg.DBConfig.DataSourceName, cfg.DBConfig.Migrate.Dir)
+	if conf.DBConfig.Migrate.Enable {
+		err := migrateDB(conf.DBConfig.DataSourceName, conf.DBConfig.Migrate.Dir)
 		if err != nil {
 			return nil, err
 		}

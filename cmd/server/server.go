@@ -31,8 +31,8 @@ func startAppServer(conf *config.Config) {
 	appsrv := &http.Server{
 		Addr:         fmt.Sprintf(":%d", conf.ServerConfig.Port),
 		Handler:      srv,
-		ReadTimeout:  parseDuration(conf.ServerConfig.ReadTimeout, time.Second*5),
-		WriteTimeout: parseDuration(conf.ServerConfig.WriteTimeout, time.Second*10),
+		ReadTimeout:  conf.ServerConfig.ReadTimeout,
+		WriteTimeout: conf.ServerConfig.WriteTimeout,
 	}
 
 	go func() {
@@ -54,12 +54,4 @@ func startAppServer(conf *config.Config) {
 		logging.DefaultLogger().Fatal(err)
 	}
 	logging.DefaultLogger().Info("Terminate application")
-}
-
-func parseDuration(v string, defaultDuration time.Duration) time.Duration {
-	d, err := time.ParseDuration(v)
-	if err != nil {
-		return defaultDuration
-	}
-	return d
 }

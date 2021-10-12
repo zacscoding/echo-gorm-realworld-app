@@ -16,16 +16,12 @@ type Handler struct {
 }
 
 // NewHandler returns a new Handle from given serverenv.ServerEnv and config.Config.
-func NewHandler(env *serverenv.ServerEnv, cfg *config.Config) (*Handler, error) {
-	jwtDuration, err := time.ParseDuration(cfg.JWTConfig.SessionTimeout)
-	if err != nil {
-		return nil, err
-	}
+func NewHandler(env *serverenv.ServerEnv, conf *config.Config) (*Handler, error) {
 	return &Handler{
-		cfg:         cfg,
-		userDB:      userDB.NewUserDB(cfg, env.GetDB()),
-		jwtSecret:   []byte(cfg.JWTConfig.Secret),
-		jwtDuration: jwtDuration,
+		cfg:         conf,
+		userDB:      userDB.NewUserDB(conf, env.GetDB()),
+		jwtSecret:   []byte(conf.JWTConfig.Secret),
+		jwtDuration: conf.JWTConfig.SessionTimeout,
 	}, nil
 }
 
