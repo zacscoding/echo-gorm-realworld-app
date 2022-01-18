@@ -12,10 +12,12 @@ import (
 	"go.uber.org/zap/zapcore"
 	"gorm.io/gorm"
 	"math"
-	"math/rand"
+	"sync/atomic"
 	"testing"
 	"time"
 )
+
+var idx = int32(0)
 
 var (
 	defaultUser  = newTestUser("default@gmail.com", false)
@@ -373,13 +375,13 @@ func (s *Suite) TestFindFollowerIDs() {
 }
 
 func newTestUser(email string, disabled bool) *model.User {
-	randIdx := rand.Intn(100)
+	idx := atomic.AddInt32(&idx, 1)
 	return &model.User{
 		Email:     email,
-		Name:      fmt.Sprintf("zac-%d", randIdx),
-		Password:  fmt.Sprintf("password%d", randIdx),
-		Bio:       fmt.Sprintf("working during %d days...", randIdx),
-		Image:     fmt.Sprintf("https://mycdn/profile-%d.png", randIdx),
+		Name:      fmt.Sprintf("zac-%d", idx),
+		Password:  fmt.Sprintf("password%d", idx),
+		Bio:       fmt.Sprintf("working during %d days...", idx),
+		Image:     fmt.Sprintf("https://mycdn/profile-%d.png", idx),
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 		Disabled:  disabled,
